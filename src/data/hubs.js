@@ -149,3 +149,60 @@ export const SOFTWARE = [
     ],
   },
 ]
+
+// Harmless prank kit — batch files and CMD one-liners that LOOK scary
+// but do nothing. Every one is reversible by closing the window (or the
+// abort command for the shutdown scare). Never anything destructive.
+export const PRANKS = [
+  {
+    title: 'Matrix rain',
+    kind: 'Batch file',
+    desc: 'Endless green falling numbers. Looks elite, does absolutely zero.',
+    code: '@echo off\ntitle MATRIX\ncolor 02\n:start\necho %random% %random% %random% %random% %random%\ngoto start',
+    note: 'Stop it by closing the window.',
+  },
+  {
+    title: 'Fake hacker terminal',
+    kind: 'Batch file',
+    desc: 'Prints a dramatic "hacking" sequence with pauses, ends with ACCESS GRANTED.',
+    code: '@echo off\ntitle SECURE CONNECTION\ncolor 0a\necho Initializing hack sequence...\nping localhost -n 3 >nul\necho Bypassing firewall... DONE\nping localhost -n 2 >nul\necho Cracking passwords... DONE\necho.\necho ACCESS GRANTED. Just kidding — close this window.\npause',
+    note: 'The ping lines are just sleep timers. Nothing connects anywhere.',
+  },
+  {
+    title: 'Totally legit virus scan',
+    kind: 'Batch file',
+    desc: 'A red "antivirus" scan that finds exactly one gullible friend.',
+    code: '@echo off\ntitle ANTIVIRUS PRO 3000\ncolor 0c\necho Scanning C:\\ for viruses...\nping localhost -n 3 >nul\necho Found 0 viruses and 1 gullible friend.\necho (This script does nothing. That is the joke.)\npause',
+    note: 'Red text sells the panic. It touches no files.',
+  },
+  {
+    title: 'Shutdown scare (+ abort)',
+    kind: 'CMD one-liners',
+    desc: 'Starts a 90-second shutdown countdown with a scary message. Fully cancellable.',
+    code: 'shutdown -s -t 90 -c "Self-destruct in 90 seconds"',
+    extra: 'shutdown -a',
+    extraLabel: 'Abort (the antidote — always share this second)',
+    note: 'Rule: never send the scare without the abort. Abort works any time before zero.',
+  },
+  {
+    title: 'Drive tree flex',
+    kind: 'CMD one-liner',
+    desc: 'Prints the entire drive as a giant scrolling tree. Looks insanely technical.',
+    code: 'tree C:\\ /f | more',
+    note: 'Press any key to scroll, Ctrl+C to stop. Read-only.',
+  },
+  {
+    title: 'Trace the internet',
+    kind: 'CMD one-liner',
+    desc: 'Shows every hop between you and Google. Movie-hacker vibes, totally legit tool.',
+    code: 'tracert 8.8.8.8',
+    note: 'tracert is a real diagnostic every admin uses.',
+  },
+  {
+    title: 'Hacker prompt makeover',
+    kind: 'CMD one-liners',
+    desc: 'Turns a boring terminal green with a HACKER prompt. Pure costume.',
+    code: 'title HACKER TERMINAL\ncolor 0a\nprompt HACKER$G',
+    note: 'Type `prompt` alone to change it back. Cosmetic only.',
+  },
+]

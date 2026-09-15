@@ -1,7 +1,7 @@
 // LootCave UI config — tabs, descriptions, themes.
 // Edit labels/descriptions freely. Icons come from lucide.dev (see package.json: lucide-react).
 import {
-  Coffee, Download, Flower2, Gamepad2, Globe, Home, IdCard, Laptop, Lock, Mail,
+  Coffee, Download, Flower2, Gamepad2, Globe, Home, IdCard, Laptop, Laugh, Lock, Mail,
   Moon, Send, Settings, Smartphone, Snowflake, Sparkles, Sun, Sunset, Terminal,
   Waves, Wrench, Zap,
 } from 'lucide-react'
@@ -16,6 +16,7 @@ export const TABS = [
   { id: 'download', label: 'Downloader', icon: Download },
   { id: 'software', label: 'Software', icon: Laptop },
   { id: 'recommend', label: 'Recommend', icon: Send },
+  { id: 'pranks', label: 'Pranks', icon: Laugh },
   { id: 'tools', label: 'Mini Tools', icon: Wrench },
   { id: 'settings', label: 'Settings', icon: Settings },
   { id: 'admin', label: 'Admin', icon: Lock },
@@ -31,6 +32,7 @@ export const TAB_BLURBS = {
   download: 'YouTube & media downloading: copy-paste yt-dlp commands for MP3/MP4 plus the best no-install tools.',
   software: 'Essential free software everyone should have — browsers, media, utilities, dev tools, launchers.',
   recommend: 'Found something cool? Send it in — your suggestion lands in the owner inbox.',
+  pranks: 'Harmless CMD troll kit: matrix rain, fake hacker terminals, shutdown scare with antidote.',
   tools: 'Tiny offline-first utilities: password generator with charset control, UUID, QR codes, Base64.',
   settings: 'Make it yours — themes, font size, default tab, inbox refresh speed. Saved in your browser.',
   admin: 'Behind the scenes — login required. Stats, API health checks, event log, and data controls.',

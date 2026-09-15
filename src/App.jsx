@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Binary, CaseSensitive, ClipboardList, Clock, Copy, Dices, Download, ExternalLink,
   Fingerprint, FileJson, Gamepad2, Gem, Globe, HardDrive, Hash, IdCard, Images, KeyRound,
-  Laptop, Link2, Lock, Mail, MousePointerClick, Music, Palette, Pencil, Plus, QrCode,
+  Laptop, Laugh, Link2, Lock, Mail, MousePointerClick, Music, Palette, Pencil, Plus, QrCode,
   RefreshCw, RotateCcw, Ruler, Scale, ScanSearch, Send, Settings as SettingsIcon, ShieldCheck, Smartphone,
   Star, Target, TextQuote, Timer, TriangleAlert, Tv, Wifi, Wrench,
 } from 'lucide-react'
@@ -152,7 +152,7 @@ function Home({ go }) {
           <button className="ghost" onClick={() => go('settings')}><SettingsIcon size={15} className="btnIcon" /> Customize theme</button>
         </div>
       </div>
-      <SectionHead title="What lives here" desc="Eleven sections, each with its own job. Hover nothing — just click and go." />
+      <SectionHead title="What lives here" desc="Twelve sections, each with its own job. Hover nothing — just click and go." />
       <div className="cards">
         <div className="card"><h3><Mail size={16} className="hicon" /> Temp Email</h3><p>Real 1secmail inbox in-browser with automatic proxy fallback. Copy an address, receive mail, refresh live.</p><button className="ghost" onClick={() => go('email')}>Open →</button></div>
         <div className="card"><h3><Smartphone size={16} className="hicon" /> Temp Numbers</h3><p>Free public SMS receivers for OTPs anyone can read, plus paid private rentals for sensitive codes. Safety notes included.</p><button className="ghost" onClick={() => go('numbers')}>Open →</button></div>
@@ -165,6 +165,7 @@ function Home({ go }) {
         <div className="card"><h3><Download size={16} className="hicon" /> Downloader</h3><p>YouTube MP3/MP4 via copy-paste yt-dlp commands + no-install tools like Cobalt.</p><button className="ghost" onClick={() => go('download')}>Open →</button></div>
         <div className="card"><h3><Laptop size={16} className="hicon" /> Software</h3><p>Essential free apps: Firefox, VLC, OBS, PowerToys, VS Code, Steam, Heroic and more.</p><button className="ghost" onClick={() => go('software')}>Open →</button></div>
         <div className="card"><h3><Send size={16} className="hicon" /> Recommend</h3><p>Found something cool? Send the link + description — it lands in the owner inbox for review.</p><button className="ghost" onClick={() => go('recommend')}>Open →</button></div>
+        <div className="card"><h3><Laugh size={16} className="hicon" /> Pranks</h3><p>Harmless CMD troll kit: matrix rain, fake terminals, shutdown scare with antidote.</p><button className="ghost" onClick={() => go('pranks')}>Open →</button></div>
       </div>
       <div className="card">
         <h3><ShieldCheck size={16} className="hicon" /> House rules</h3>
@@ -1087,7 +1088,7 @@ function Tools({ settings, update }) {
 }
 
 /* ---------- Mods hub ---------- */
-import { MOD_GAMES, DL_TOOLS, SOFTWARE } from './data/hubs.js'
+import { MOD_GAMES, DL_TOOLS, SOFTWARE, PRANKS } from './data/hubs.js'
 
 function Mods({ query }) {
   const q = query.toLowerCase()
@@ -1283,6 +1284,34 @@ function Recommend() {
           </ul>
         </div>
       </div>
+    </>
+  )
+}
+
+/* ---------- Harmless prank kit ---------- */
+function Pranks({ query }) {
+  const q = query.toLowerCase()
+  const list = PRANKS.filter((p) => (p.title + p.desc + p.code).toLowerCase().includes(q))
+  return (
+    <>
+      <SectionHead title="Harmless prank kit" desc="Copy-paste troll commands for CMD: fake matrix rain, hacker terminals, a shutdown scare with antidote. Everything here is reversible and touches zero files." />
+      <div className="notice"><Laugh size={15} className="hicon" /> <b>Rules of trolling:</b> prank friends, never work PCs or strangers. Batch files: paste into Notepad → Save as <code>prank.bat</code> (type: All files) → double-click. CMD one-liners paste straight into Command Prompt.</div>
+      <div className="cards">
+        {list.map((p) => (
+          <div key={p.title} className="card">
+            <h3>{p.title}</h3>
+            <p className="muted">{p.kind} · harm level: 0</p>
+            <p>{p.desc}</p>
+            <pre className="dump">{p.code}</pre>
+            <div className="btnRow">
+              <button className="ghost sm" onClick={() => copy(p.code)}><Copy size={13} className="btnIcon" /> Copy</button>
+              {p.extra && <button className="ghost sm" onClick={() => copy(p.extra)}><Copy size={13} className="btnIcon" /> Copy {p.extraLabel || 'extra'}</button>}
+            </div>
+            {p.note && <p className="muted">{p.note}</p>}
+          </div>
+        ))}
+      </div>
+      {list.length === 0 && <p className="muted">No matches. Try "matrix", "shutdown" or "batch".</p>}
     </>
   )
 }
@@ -1668,6 +1697,7 @@ export default function App() {
         {tab === 'download' && <Downloader />}
         {tab === 'software' && <Software query={query} />}
         {tab === 'recommend' && <Recommend />}
+        {tab === 'pranks' && <Pranks query={query} />}
         {tab === 'tools' && <Tools settings={settings} update={update} />}
         {tab === 'settings' && <Settings settings={settings} update={update} reset={() => setSettings(DEFAULT_SETTINGS)} />}
         {tab === 'admin' && <Admin customSites={customSites} onDeleteSite={delSite} onWipe={wipe} />}
