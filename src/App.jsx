@@ -33,7 +33,7 @@ const DEFAULT_SETTINGS = {
   customTagline: '',
   emailAuto: true,
   discordInvite: 'https://discord.gg/YWhFwTxP8h',
-  adClient: '',
+  adClient: 'ca-pub-3810875028019242',
 }
 
 function loadSettings() {
@@ -47,6 +47,7 @@ function loadSettings() {
     if (!TABS.some((t) => t.id === s.defaultTab)) s.defaultTab = 'home'
     if (!Array.isArray(s.hiddenTabs)) s.hiddenTabs = []
     if (!s.discordInvite) s.discordInvite = DEFAULT_SETTINGS.discordInvite
+    if (!s.adClient) s.adClient = DEFAULT_SETTINGS.adClient
     s.refreshSec = Math.min(120, Math.max(5, +s.refreshSec || 12))
     return s
   } catch {
@@ -2285,7 +2286,7 @@ function About({ settings, go }) {
             <div className="memberMain">
               <b>Elling</b>
               <span className="roleBadge">Founder / CEO</span>
-              <span className="muted">16 - product direction, content review, design</span>
+              <span className="muted">19 - product direction, content review, design</span>
             </div>
           </div>
           <p className="muted">Open volunteer roles: <b>Moderator</b> (Discord and chat conduct) and <b>Scout</b> (sources new tools through the Recommend tab). Apply with a recommendation marked APPLICATION in the notes.</p>
@@ -3371,7 +3372,7 @@ function Settings({ settings, update, reset, customSites, setCustomSites }) {
             <input value={settings.discordInvite} onChange={(e) => update({ discordInvite: e.target.value })} placeholder="https://discord.gg/…" />
           </label>
           <h3 className="cat">Monetization</h3>
-          <label className="setRow">AdSense publisher ID - enables Google Auto Ads site-wide. Empty = no ads.
+          <label className="setRow">AdSense publisher ID - enables Google Auto Ads site-wide (empty = site default).
             <input value={settings.adClient} onChange={(e) => update({ adClient: e.target.value.trim() })} placeholder="ca-pub-XXXXXXXXXXXXXXXX" />
           </label>
           <p className="muted">Needs an approved AdSense account, and the account holder must be 18+. Reload the page after saving. Honest math: this crowd runs adblockers, so expect pocket money, not rent money.</p>
