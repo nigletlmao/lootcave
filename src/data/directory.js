@@ -99,6 +99,7 @@ export const COOL_SITES = [
   { name: 'Khan Academy', url: 'https://www.khanacademy.org', desc: 'Free world-class lessons from math to art history.', cat: 'Everyday Utils' },
   { name: 'freeCodeCamp', url: 'https://www.freecodecamp.org', desc: 'Free project-based coding curriculum, beginner to job-ready.', cat: 'Everyday Utils' },
   { name: 'Privacy Guides', url: 'https://www.privacyguides.org', desc: 'Community-vetted privacy tools + how-tos. No sponsored picks.', cat: 'Everyday Utils' },
+  { name: 'Pirated Animes', url: 'https://anikage.cc/', desc: 'Pirated Anime Website', cat: 'Everyday Utils' },
   // Files
   { name: 'File.io', url: 'https://www.file.io', desc: 'Upload a file, get a link that self-destructs after one download.', cat: 'Files' },
   { name: '0x0.st', url: 'https://0x0.st', desc: 'Nerd-favorite file host: upload straight from terminal with curl.', cat: 'Files' },
@@ -316,5 +317,5 @@ export const CAT_DESC = {
 export const RECOMMENDED = new Set([
   'uBlock Origin', 'Bitwarden', 'TinyWow', 'Photopea', 'Falstad Circuit Simulator',
   'Wokwi', 'Hugging Face', 'Cloudflare Pages', 'Wayback Machine', 'Radio Garden',
-  'urlscan.io', 'Have I Been Pwned', 'buyelias.com', 'Modrinth', 'Cobalt',
+  'urlscan.io', 'Have I Been Pwned', 'buyelias.com', 'Modrinth', 'Cobalt', 'Pirated Animes',
 ])
