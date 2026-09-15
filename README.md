@@ -1,16 +1,46 @@
-# React + Vite
+# LootCave — temp emails, numbers, mods, tools & cool sites
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Static React + Vite site. No backend, no tracking, everything free.
 
-Currently, two official plugins are available:
+## Run it
+```
+npm install   # first time only
+npm run dev   # → http://localhost:5173
+npm run build # → dist/ (deploy this folder anywhere static)
+npm run lint  # must show 0 errors before pushing
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Folder map (what to touch)
+```
+AI Website/
+├── index.html          # page title + fallback background
+├── package.json        # project name + dependencies (lucide-react for icons)
+├── vite.config.js      # build config (you rarely need this)
+├── public/             # favicon, static assets (copied to dist as-is)
+├── dist/               # build output — generated, never edit, never commit
+├── node_modules/       # dependencies — generated, never touch
+└── src/
+    ├── main.jsx        # entry point (leave alone)
+    ├── index.css       # tiny global styles
+    ├── App.jsx         # ALL page components (Home, Email, Tools, Admin…)
+    ├── App.css         # ALL styling + the 10 themes
+    └── data/           # ★ EDIT THESE to change site content
+        ├── ui.js        # tabs, tab descriptions, themes
+        ├── directory.js # SMS sites, email providers, cool sites, categories, recommended
+        └── hubs.js      # mod games, downloader tools, software groups
+```
 
-## React Compiler
+## Adding a site (30 seconds)
+1. Open `src/data/directory.js` (cool sites) or `src/data/hubs.js` (mods/software).
+2. Copy any `{ name, url, desc, ... }` line, paste it under the right `// comment`, edit the text.
+3. New category? Add the `cat: 'Name'` on your lines + one line in `CAT_DESC`.
+4. Save → browser refreshes by itself → `git add -A && git commit -m "..." && git push` to go live.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Deploy (Cloudflare Pages, free)
+Push to GitHub, then Pages → Connect to Git → build `npm run build`, output `dist`.
+Every push rebuilds the live site automatically.
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Rules of the cave
+- Free + legal only: no pirate streams, no "free Robux" junk, no malware traps.
+- Every directory entry needs a `desc` saying WHY it's there.
+- `npm run lint` must pass with 0 errors before every push.

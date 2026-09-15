@@ -1,53 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Binary, CaseSensitive, ClipboardList, Clock, Coffee, Copy, Dices, Download, ExternalLink,
-  Fingerprint, FileJson, Flower2, Gamepad2, Gem, Globe, HardDrive, Hash, Home as HomeIcon, IdCard, Images, KeyRound,
-  Laptop, Link2, Lock, Mail, Moon, MousePointerClick, Music, Palette, Pencil, Plus, QrCode,
-  RefreshCw, RotateCcw,   Ruler, Scale, ScanSearch, Settings as SettingsIcon, ShieldCheck, Smartphone, Snowflake, Sparkles,
-  Star, Sun, Sunset, Target, Terminal, TextQuote, Timer, TriangleAlert, Tv, Waves, Wifi, Wrench, Zap,
+  Binary, CaseSensitive, ClipboardList, Clock, Copy, Dices, Download, ExternalLink,
+  Fingerprint, FileJson, Gamepad2, Gem, Globe, HardDrive, Hash, IdCard, Images, KeyRound,
+  Laptop, Link2, Lock, Mail, MousePointerClick, Music, Palette, Pencil, Plus, QrCode,
+  RefreshCw, RotateCcw, Ruler, Scale, ScanSearch, Send, Settings as SettingsIcon, ShieldCheck, Smartphone,
+  Star, Target, TextQuote, Timer, TriangleAlert, Tv, Wifi, Wrench,
 } from 'lucide-react'
 import './App.css'
 
-const TABS = [
-  { id: 'home', label: 'Home', icon: HomeIcon },
-  { id: 'email', label: 'Temp Email', icon: Mail },
-  { id: 'numbers', label: 'Temp Numbers', icon: Smartphone },
-  { id: 'ids', label: 'Fake IDs', icon: IdCard },
-  { id: 'sites', label: 'Cool Sites', icon: Globe },
-  { id: 'mods', label: 'Mods', icon: Gamepad2 },
-  { id: 'download', label: 'Downloader', icon: Download },
-  { id: 'software', label: 'Software', icon: Laptop },
-  { id: 'tools', label: 'Mini Tools', icon: Wrench },
-  { id: 'settings', label: 'Settings', icon: SettingsIcon },
-  { id: 'admin', label: 'Admin', icon: Lock },
-]
-
-const TAB_BLURBS = {
-  home: 'Start here — what lootcave is, quick jumps to every tool, and the house rules.',
-  email: 'A real disposable inbox in your browser (via 1secmail) + backup providers. Copy an address, receive mail, no signup.',
-  numbers: 'Free public SMS receivers for throwaway OTPs + paid private rentals. Read the safety warning first.',
-  ids: 'One-click fake identities for testing signups. Generated locally — nothing leaves your browser.',
-  sites: 'Hand-picked directory: security, adblock, sims, design, learning, Reddit gems, hosting, AI, utils + legal streaming. You can add your own.',
-  mods: 'Mod hubs for FiveM, Minecraft, GTA V, Bethesda games, Sims and more — plus the managers that install them.',
-  download: 'YouTube & media downloading: copy-paste yt-dlp commands for MP3/MP4 plus the best no-install tools.',
-  software: 'Essential free software everyone should have — browsers, media, utilities, dev tools, launchers.',
-  tools: 'Tiny offline-first utilities: password generator with charset control, UUID, QR codes, Base64.',
-  settings: 'Make it yours — themes, font size, default tab, inbox refresh speed. Saved in your browser.',
-  admin: 'Behind the scenes — login required. Stats, API health checks, event log, and data controls.',
-}
-
-const THEMES = [
-  { id: 'midnight', name: 'Midnight', icon: Moon, desc: 'Default dark. Easy on the eyes.' },
-  { id: 'light', name: 'Light', icon: Sun, desc: 'Clean bright mode for daytime.' },
-  { id: 'neon', name: 'Neon', icon: Zap, desc: 'Cyberpunk pink + cyan on black.' },
-  { id: 'terminal', name: 'Terminal', icon: Terminal, desc: 'Green-on-black hacker mono.' },
-  { id: 'ocean', name: 'Ocean', icon: Waves, desc: 'Deep blue, calm vibes.' },
-  { id: 'sunset', name: 'Sunset', icon: Sunset, desc: 'Warm orange dusk tones.' },
-  { id: 'dracula', name: 'Dracula', icon: Sparkles, desc: 'The famous purple-on-dark editor theme.' },
-  { id: 'nord', name: 'Nord', icon: Snowflake, desc: 'Frosty arctic blues, calm and crisp.' },
-  { id: 'coffee', name: 'Coffee', icon: Coffee, desc: 'Warm sepia browns for late nights.' },
-  { id: 'rose', name: 'Rose', icon: Flower2, desc: 'Soft light-pink daytime theme.' },
-]
+import { TABS, TAB_BLURBS, THEMES } from './data/ui.js'
 
 const DEFAULT_SETTINGS = {
   theme: 'midnight',
@@ -136,203 +97,7 @@ async function fetch1sec(path) {
   throw new Error(errors.join('  |  '))
 }
 
-const SMS_SITES = [
-  { name: 'Receive SMSS', url: 'https://receive-smss.com', desc: 'Free public numbers across USA / UK / EU. Pick a number, read SMS in browser. No signup.', tags: 'free usa uk' },
-  { name: 'SMS Receive Free', url: 'https://smsreceivefree.com', desc: 'Disposable US/CA numbers refreshed hourly. Good for one-off verifications.', tags: 'free usa' },
-  { name: 'Receive SMS Online', url: 'https://www.receive-sms-online.info', desc: 'Big country list, decent for OTPs that accept public numbers.', tags: 'free otp' },
-  { name: 'FreePhoneNum', url: 'https://freephonenum.com', desc: 'Temporary numbers aimed at verification codes, simple UI.', tags: 'free verification' },
-  { name: 'SMS-Activate (paid)', url: 'https://sms-activate.io', desc: 'Rent a PRIVATE number per-service from ~$0.10. Top up balance, get OTPs nobody else sees.', tags: 'paid private api' },
-  { name: '5SIM (paid)', url: 'https://5sim.net', desc: 'Private activations for 180+ services with API support. Pay per SMS.', tags: 'paid private' },
-  { name: 'Quackr', url: 'https://quackr.io', desc: 'Directory of free + temporary numbers with per-number inboxes.', tags: 'free directory' },
-  { name: 'Anonym SMS', url: 'https://anonymsms.com', desc: 'Anonymous free receivers, no account needed.', tags: 'free anonymous' },
-]
-
-const EMAIL_PROVIDERS = [
-  { name: 'Temp-Mail', url: 'https://temp-mail.org', desc: 'The classic disposable inbox. Instant address, auto-refresh.' },
-  { name: 'Guerrilla Mail', url: 'https://www.guerrillamail.com', desc: 'Disposable inbox with scrambled-address option for extra privacy.' },
-  { name: '10 Minute Mail', url: 'https://10minutemail.com', desc: 'Self-destructing inbox — perfect for one confirmation link.' },
-  { name: 'Mail.tm', url: 'https://mail.tm', desc: 'Free API-based temp mail with apps + multi-address support.' },
-  { name: 'Mailinator', url: 'https://www.mailinator.com', desc: 'Public inbox anyone can check — use anything@mailinator.com.' },
-]
-
-const COOL_SITES = [
-  // Security
-  { name: 'Have I Been Pwned', url: 'https://haveibeenpwned.com', desc: 'Paste your email to see if it appeared in a data breach. Free, by Troy Hunt.', cat: 'Security' },
-  { name: 'VirusTotal', url: 'https://www.virustotal.com', desc: 'Paste a shady link or upload a file — scans with 70+ antivirus engines.', cat: 'Security' },
-  { name: 'Bitwarden', url: 'https://bitwarden.com', desc: 'Free open-source password manager. Stop reusing passwords.', cat: 'Security' },
-  { name: '2FA Directory', url: 'https://2fa.directory', desc: 'Look up any site and see if it supports two-factor auth + how to enable it.', cat: 'Security' },
-  // Adblock & privacy
-  { name: 'uBlock Origin', url: 'https://ublockorigin.com', desc: 'The adblocker everyone recommends. Open-source, light on RAM, kills YouTube ads + trackers.', cat: 'Adblock & Privacy' },
-  { name: 'AdGuard', url: 'https://adguard.com', desc: 'Blocks ads + trackers system-wide (apps too, not just browser). Free browser ext.', cat: 'Adblock & Privacy' },
-  { name: 'Privacy Badger', url: 'https://privacybadger.org', desc: 'EFF tracker blocker that auto-learns who spies on you.', cat: 'Adblock & Privacy' },
-  { name: 'FilterLists', url: 'https://filterlists.com', desc: 'Directory of 300+ blocklists — find lists for ads, crypto-miners, regions, annoying cookie popups.', cat: 'Adblock & Privacy' },
-  { name: 'Adblock Tester', url: 'https://adblock-tester.com', desc: 'Scores your adblocker out of 100 with live tests. Run before/after tuning.', cat: 'Adblock & Privacy' },
-  { name: 'Cover Your Tracks', url: 'https://coveryourtracks.eff.org', desc: "EFF test: how trackers see your browser, and whether you're fingerprintable.", cat: 'Adblock & Privacy' },
-  { name: 'Proton Mail', url: 'https://proton.me/mail', desc: 'Free encrypted email from Switzerland. Good permanent inbox to pair with throwaways.', cat: 'Adblock & Privacy' },
-  { name: 'Signal', url: 'https://signal.org', desc: 'Private messenger, no ads, no tracking. The default rec for sensitive chats.', cat: 'Adblock & Privacy' },
-  { name: 'JustDeleteMe', url: 'https://justdeleteme.xyz', desc: 'Tells you exactly how to delete any account, with difficulty ratings.', cat: 'Adblock & Privacy' },
-  // Simulators & playgrounds
-  { name: 'Falstad Circuit Simulator', url: 'https://www.falstad.com/circuit/', desc: 'Legendary animated circuit sim — watch current flow as moving dots. No signup, fully free.', cat: 'Simulators & Playgrounds' },
-  { name: 'Wokwi', url: 'https://wokwi.com', desc: 'Simulate Arduino, ESP32 and Pico firmware in the browser, Wi-Fi included. Free tier.', cat: 'Simulators & Playgrounds' },
-  { name: 'Tinkercad Circuits', url: 'https://www.tinkercad.com/circuits', desc: 'Virtual breadboard + Arduino you can program in blocks or C++. Easiest start (Autodesk account).', cat: 'Simulators & Playgrounds' },
-  { name: 'CircuitSim', url: 'https://circuitsim.com/', desc: 'Real SPICE engine in the browser with charts + 5000 parts. Free tier, no install.', cat: 'Simulators & Playgrounds' },
-  { name: 'PhET Simulations', url: 'https://phet.colorado.edu', desc: '100+ free physics/chem/math sims from University of Colorado. Gold for homework intuition.', cat: 'Simulators & Playgrounds' },
-  { name: 'Stellarium Web', url: 'https://stellarium-web.org', desc: 'Planetarium in your browser — point at the sky, identify stars and planets live.', cat: 'Simulators & Playgrounds' },
-  { name: 'Radio Garden', url: 'https://radio.garden', desc: 'Spin a 3D globe and tune into live radio from anywhere on Earth.', cat: 'Simulators & Playgrounds' },
-  { name: "Quick, Draw!", url: 'https://quickdraw.withgoogle.com', desc: "Google AI guesses your doodles in 20 seconds. Doodle dataset is open source.", cat: 'Simulators & Playgrounds' },
-  { name: 'Hacker Typer', url: 'https://hackertyper.net', desc: 'Mash the keyboard, look like a movie hacker. Pure fun, great for demos.', cat: 'Simulators & Playgrounds' },
-  // Reddit gems
-  { name: 'r/selfhosted', url: 'https://www.reddit.com/r/selfhosted/', desc: 'Run your own services (media servers, clouds, bots). Tons of free project ideas.', cat: 'Reddit Gems' },
-  { name: 'r/homelab', url: 'https://www.reddit.com/r/homelab/', desc: 'Home servers + networking on a budget. Great for learning infra.', cat: 'Reddit Gems' },
-  { name: 'r/learnprogramming', url: 'https://www.reddit.com/r/learnprogramming/', desc: 'Beginner-friendly coding help + curated resources.', cat: 'Reddit Gems' },
-  { name: 'r/webdev', url: 'https://www.reddit.com/r/webdev/', desc: 'Web dev news, showcases, and career advice.', cat: 'Reddit Gems' },
-  { name: 'r/opensource', url: 'https://www.reddit.com/r/opensource/', desc: 'New free + open-source apps surface here daily.', cat: 'Reddit Gems' },
-  { name: 'r/degoogle', url: 'https://www.reddit.com/r/degoogle/', desc: 'Escape big-tech tracking: free private alternatives to everything.', cat: 'Reddit Gems' },
-  { name: 'r/privacy', url: 'https://www.reddit.com/r/privacy/', desc: 'Privacy news, breach alerts, and tool recommendations.', cat: 'Reddit Gems' },
-  { name: 'r/freebies', url: 'https://www.reddit.com/r/freebies/', desc: 'Legit free stuff (trials, games, samples). Check pinned rules to avoid spam.', cat: 'Reddit Gems' },
-  // Free hosting
-  { name: 'Cloudflare Pages', url: 'https://pages.cloudflare.com', desc: 'Free static hosting + global CDN. Deploy this lootcave site here for free.', cat: 'Free Hosting' },
-  { name: 'Netlify', url: 'https://www.netlify.com', desc: 'Free static hosting with 100GB bandwidth/mo. Drag-and-drop deploys.', cat: 'Free Hosting' },
-  { name: 'Vercel', url: 'https://vercel.com', desc: 'Free frontend hosting, perfect for Vite/React. Git push = live URL.', cat: 'Free Hosting' },
-  { name: 'GitHub Pages', url: 'https://pages.github.com', desc: 'Host a static site free straight from a GitHub repo.', cat: 'Free Hosting' },
-  { name: 'Render', url: 'https://render.com', desc: 'Free tier for static sites + small web services and cron jobs.', cat: 'Free Hosting' },
-  { name: 'Supabase', url: 'https://supabase.com', desc: 'Free Postgres DB + auth + storage. The free Firebase alternative.', cat: 'Free Hosting' },
-  { name: 'Firebase', url: 'https://firebase.google.com', desc: 'Google free Spark plan: hosting, auth, Firestore DB for side projects.', cat: 'Free Hosting' },
-  // Free AI
-  { name: 'ChatGPT', url: 'https://chat.openai.com', desc: 'Free tier chatbot for writing, code, homework help.', cat: 'Free AI' },
-  { name: 'Claude', url: 'https://claude.ai', desc: 'Free tier, excellent at code + long docs. Made by Anthropic.', cat: 'Free AI' },
-  { name: 'Gemini', url: 'https://gemini.google.com', desc: "Google's free AI with live web + Gmail/Docs integration.", cat: 'Free AI' },
-  { name: 'Hugging Face', url: 'https://huggingface.co', desc: 'Thousands of free models + Spaces apps + inference API. The GitHub of AI.', cat: 'Free AI' },
-  { name: 'Groq', url: 'https://groq.com', desc: 'Ridiculously fast free LLM inference. Great playground for open models.', cat: 'Free AI' },
-  { name: 'Perplexity', url: 'https://www.perplexity.ai', desc: 'AI search that cites sources. Free tier covers daily research.', cat: 'Free AI' },
-  { name: 'Copilot (Microsoft)', url: 'https://copilot.microsoft.com', desc: 'Free GPT-powered assistant in Edge/Windows + web.', cat: 'Free AI' },
-  // Everyday utils
-  { name: 'TinyWow', url: 'https://tinywow.com', desc: 'Hundreds of free file tools (PDF, image, video, AI) with no signup.', cat: 'Everyday Utils' },
-  { name: 'Wolfram Alpha', url: 'https://www.wolframalpha.com', desc: 'Computes answers — math, science, finance — instead of just linking pages.', cat: 'Everyday Utils' },
-  { name: 'Remove.bg', url: 'https://remove.bg', desc: 'One-click AI background removal for photos.', cat: 'Everyday Utils' },
-  { name: 'Ninite', url: 'https://ninite.com', desc: 'Batch-install Windows apps with one installer, zero junkware.', cat: 'Everyday Utils' },
-  { name: 'Down For Everyone?', url: 'https://downforeveryoneorjustme.com', desc: 'Is the site down, or is it just you? One-click answer.', cat: 'Everyday Utils' },
-  { name: 'Fast.com', url: 'https://fast.com', desc: "Netflix's one-click internet speed test.", cat: 'Everyday Utils' },
-  { name: 'CamelCamelCamel', url: 'https://camelcamelcamel.com', desc: 'Amazon price history charts + drop alerts. Never overpay again.', cat: 'Everyday Utils' },
-  { name: 'Wayback Machine', url: 'https://web.archive.org', desc: 'See any website as it looked years ago + archive pages yourself.', cat: 'Everyday Utils' },
-  { name: 'DuckDuckGo', url: 'https://duckduckgo.com', desc: 'Private search with no tracking + handy !bang shortcuts.', cat: 'Everyday Utils' },
-  { name: 'JustWatch', url: 'https://www.justwatch.com', desc: 'Search any movie/show, see exactly which LEGAL service streams it.', cat: 'Everyday Utils' },
-  { name: 'Rome2Rio', url: 'https://www.rome2rio.com', desc: 'Routes between any two places across bus, train, ferry and flights.', cat: 'Everyday Utils' },
-  { name: 'Coolors', url: 'https://coolors.co', desc: 'Hit spacebar, get a color palette. Export to CSS/Figma in one click.', cat: 'Everyday Utils' },
-  { name: 'Desmos Calculator', url: 'https://www.desmos.com/calculator', desc: 'Gorgeous free graphing calculator that runs in the browser.', cat: 'Everyday Utils' },
-  { name: 'Regex101', url: 'https://regex101.com', desc: 'Build + test regular expressions with live explanation of each token.', cat: 'Everyday Utils' },
-  { name: 'Can I Use', url: 'https://caniuse.com', desc: 'Browser support tables for every web feature. Dev essential.', cat: 'Everyday Utils' },
-  { name: 'MDN Web Docs', url: 'https://developer.mozilla.org', desc: 'The bible of HTML/CSS/JS reference. Accurate, example-rich.', cat: 'Everyday Utils' },
-  { name: 'Khan Academy', url: 'https://www.khanacademy.org', desc: 'Free world-class lessons from math to art history.', cat: 'Everyday Utils' },
-  { name: 'freeCodeCamp', url: 'https://www.freecodecamp.org', desc: 'Free project-based coding curriculum, beginner to job-ready.', cat: 'Everyday Utils' },
-  { name: 'Privacy Guides', url: 'https://www.privacyguides.org', desc: 'Community-vetted privacy tools + how-tos. No sponsored picks.', cat: 'Everyday Utils' },
-  // Files
-  { name: 'File.io', url: 'https://www.file.io', desc: 'Upload a file, get a link that self-destructs after one download.', cat: 'Files' },
-  { name: '0x0.st', url: 'https://0x0.st', desc: 'Nerd-favorite file host: upload straight from terminal with curl.', cat: 'Files' },
-  { name: 'Privnote', url: 'https://privnote.com', desc: 'Send a note that destroys itself after being read once.', cat: 'Files' },
-  // Dev
-  { name: 'Roadmap.sh', url: 'https://roadmap.sh', desc: 'Step-by-step dev career roadmaps (frontend, backend, DevOps…).', cat: 'Dev' },
-  { name: 'Excalidraw', url: 'https://excalidraw.com', desc: 'Hand-drawn-style whiteboard for diagrams + wireframes. Free.', cat: 'Dev' },
-  { name: 'AlternativeTo', url: 'https://alternativeto.net', desc: 'Type any paid app, get the best free alternatives.', cat: 'Dev' },
-  { name: 'Stack Overflow', url: 'https://stackoverflow.com', desc: 'Search-first Q&A for every error message you will ever meet.', cat: 'Dev' },
-  // Media
-  { name: 'Photopea', url: 'https://www.photopea.com', desc: 'Full Photoshop clone in your browser. Opens PSD/XD/Sketch free.', cat: 'Media' },
-  { name: 'Cobalt', url: 'https://cobalt.tools', desc: 'Paste a video/audio link, download cleanly without watermarks.', cat: 'Media' },
-  // Legal streaming only — no pirate sites
-  { name: 'Crunchyroll', url: 'https://www.crunchyroll.com', desc: 'The legal anime home. Free ad-supported tier with huge catalog.', cat: 'Watch (legal)' },
-  { name: 'Tubi', url: 'https://tubitv.com', desc: '100% free + legal movies and dubbed anime. No signup needed.', cat: 'Watch (legal)' },
-  { name: 'Pluto TV', url: 'https://pluto.tv', desc: 'Free live channels + on-demand, including anime channels.', cat: 'Watch (legal)' },
-  { name: 'RetroCrush', url: 'https://www.retrocrush.tv', desc: 'Free classic + retro anime, fully licensed.', cat: 'Watch (legal)' },
-  { name: 'Plex Free', url: 'https://www.plex.tv', desc: 'Free legal movies/shows alongside its famous media-server app.', cat: 'Watch (legal)' },
-  { name: 'buyelias.com', url: 'https://buyelias.com', desc: 'Indie storefront worth a look — small shops like this beat megastores for unique finds.', cat: 'Shops & Deals' },
-  { name: 'Etsy', url: 'https://www.etsy.com', desc: 'Handmade, vintage and custom goods from independent sellers.', cat: 'Shops & Deals' },
-  { name: 'Back Market', url: 'https://www.backmarket.com', desc: 'Refurbished phones, laptops and consoles with warranty. Cheaper + greener.', cat: 'Shops & Deals' },
-  { name: 'DeepL', url: 'https://www.deepl.com/translator', desc: 'The most accurate free translator. Generous free tier, 30+ languages.', cat: 'Everyday Utils' },
-  { name: 'Google Translate', url: 'https://translate.google.com', desc: 'Translate text, docs, images and whole sites. Camera mode is magic abroad.', cat: 'Everyday Utils' },
-  { name: 'Timeanddate', url: 'https://www.timeanddate.com', desc: 'World clocks, time-zone converter, countdowns and calendars.', cat: 'Everyday Utils' },
-  { name: 'XE Currency', url: 'https://www.xe.com', desc: 'Live exchange rates and a converter that just works.', cat: 'Everyday Utils' },
-  { name: 'Sleepytime', url: 'https://sleepyti.me', desc: 'Tells you when to sleep/wake to rise between cycles, not mid-cycle.', cat: 'Everyday Utils' },
-  { name: 'DownDetector', url: 'https://downdetector.com', desc: 'Is Discord/Spotify down for everyone? Live outage maps say so.', cat: 'Everyday Utils' },
-  { name: 'WhatTheFont', url: 'https://www.myfonts.com/pages/whatthefont', desc: 'Upload a screenshot, identify the font. Designer essential.', cat: 'Everyday Utils' },
-  { name: 'SwissTransfer', url: 'https://www.swisstransfer.com', desc: 'Send up to 50GB free, no account. Swiss privacy included.', cat: 'Files' },
-  { name: 'StackBlitz', url: 'https://stackblitz.com', desc: 'Full dev environment in a browser tab. Prototype anything in seconds.', cat: 'Dev' },
-  { name: 'GitHub Gist', url: 'https://gist.github.com', desc: 'Share code snippets and notes with version history. Pastebin for devs.', cat: 'Dev' },
-  { name: 'JSONPlaceholder', url: 'https://jsonplaceholder.typicode.com', desc: 'Free fake REST API for testing frontends. Zero setup.', cat: 'Dev' },
-  { name: 'Lorem Picsum', url: 'https://picsum.photos', desc: 'Placeholder images via URL: size, grayscale, blur params included.', cat: 'Dev' },
-  { name: 'Shields.io', url: 'https://shields.io', desc: 'Those little badges on GitHub READMEs — generate your own.', cat: 'Dev' },
-  { name: 'Pixabay', url: 'https://pixabay.com', desc: 'Free stock photos, videos and music. No attribution needed.', cat: 'Create & Design' },
-  { name: 'Kapwing', url: 'https://www.kapwing.com', desc: 'Online video editor: memes, subtitles, resizing. Free tier works.', cat: 'Create & Design' },
-  { name: 'Coursera', url: 'https://www.coursera.org', desc: 'University courses you can audit free. Certificates cost extra.', cat: 'Learn' },
-  { name: 'edX', url: 'https://www.edx.org', desc: 'Harvard/MIT-backed free courses across everything.', cat: 'Learn' },
-  { name: 'Leonardo.ai', url: 'https://leonardo.ai', desc: 'AI image generation with daily free tokens. Great for thumbnails.', cat: 'Free AI' },
-  { name: 'Suno', url: 'https://suno.com', desc: 'Type a prompt, get a full AI song. Free credits daily.', cat: 'Free AI' },
-  { name: 'Gamma', url: 'https://gamma.app', desc: 'AI presentations, docs and sites from one prompt. Free tier.', cat: 'Free AI' },
-  { name: 'SimpleLogin', url: 'https://simplelogin.io', desc: 'Free email aliases that forward to your real inbox. Made by Proton.', cat: 'Adblock & Privacy' },
-  { name: 'addy.io', url: 'https://addy.io', desc: 'Anonymous email forwarding with a generous free tier. Pairs with temp mail.', cat: 'Adblock & Privacy' },
-  { name: 'r/coolgithubprojects', url: 'https://www.reddit.com/r/coolgithubprojects/', desc: 'Hidden GitHub gems surface here before they blow up.', cat: 'Reddit Gems' },
-  { name: 'r/InternetIsBeautiful', url: 'https://www.reddit.com/r/InternetIsBeautiful/', desc: 'Genuinely beautiful and useful websites, curated daily.', cat: 'Reddit Gems' },
-  { name: 'YouTube', url: 'https://www.youtube.com', desc: 'Free movies section plus everything else. Pairs with the Downloader tab.', cat: 'Watch (legal)' },
-  { name: 'GitHub', url: 'https://github.com', desc: 'Home of open source. Host code, ship Pages sites, find free tools.', cat: 'Dev' },
-  { name: 'CodePen', url: 'https://codepen.io', desc: 'Try HTML/CSS/JS ideas live in the browser. Infinite tricks to learn from.', cat: 'Dev' },
-  { name: 'Unsplash', url: 'https://unsplash.com', desc: 'Gorgeous free photos for wallpapers and projects.', cat: 'Create & Design' },
-  { name: 'Pexels', url: 'https://www.pexels.com', desc: 'Free stock photos + videos, no attribution needed.', cat: 'Create & Design' },
-  { name: 'TinyPNG', url: 'https://tinypng.com', desc: 'Shrinks PNG/JPG/WebP images smartly. Free batch uploads.', cat: 'Create & Design' },
-  { name: 'Figma', url: 'https://www.figma.com', desc: 'Collaborative interface design in the browser. Generous free tier.', cat: 'Create & Design' },
-  { name: 'Canva', url: 'https://www.canva.com', desc: 'Drag-and-drop designs, posters and thumbnails in minutes.', cat: 'Create & Design' },
-  { name: 'Loom', url: 'https://www.loom.com', desc: 'Record screen + face, share with a link. Free tier included.', cat: 'Create & Design' },
-  { name: 'ElevenLabs', url: 'https://elevenlabs.io', desc: 'Best-in-class AI voices. Free tier for voiceovers and fun.', cat: 'Create & Design' },
-  { name: 'MIT OpenCourseWare', url: 'https://ocw.mit.edu', desc: 'Real MIT lectures, notes and exams — free, all of it.', cat: 'Learn' },
-  { name: 'Duolingo', url: 'https://www.duolingo.com', desc: 'Gamified language learning. Free tier teaches real basics.', cat: 'Learn' },
-  { name: 'Project Gutenberg', url: 'https://www.gutenberg.org', desc: '60,000+ free classic ebooks. No account, no DRM.', cat: 'Learn' },
-  { name: 'Brilliant', url: 'https://brilliant.org', desc: 'Interactive math, science and CS courses. Free intro content.', cat: 'Learn' },
-  { name: 'Speedtest', url: 'https://www.speedtest.net', desc: 'Detailed internet speed diagnostics with history.', cat: 'Everyday Utils' },
-  { name: 'WhatIsMyIPAddress', url: 'https://whatismyipaddress.com', desc: 'Your IP, location guess, plus VPN/proxy and blacklist check.', cat: 'Everyday Utils' },
-  { name: 'Notion', url: 'https://www.notion.so', desc: 'Notes, docs and databases in one free workspace.', cat: 'Everyday Utils' },
-  { name: 'Google Flights', url: 'https://www.google.com/travel/flights', desc: 'Fast fare search with flexible-date price views.', cat: 'Everyday Utils' },
-  { name: 'Splitwise', url: 'https://www.splitwise.com', desc: 'Split bills with friends without the spreadsheet drama.', cat: 'Everyday Utils' },
-  { name: 'OSINT Framework', url: 'https://osintframework.com', desc: 'The master index: hundreds of OSINT tools organized by category. Start every investigation here.', cat: 'OSINT (legal)' },
-  { name: 'Shodan', url: 'https://www.shodan.io', desc: 'Search engine for internet-connected devices. Free tier shows what is exposed.', cat: 'OSINT (legal)' },
-  { name: 'Censys', url: 'https://search.censys.io', desc: 'Internet-wide scan data: certificates, hosts, services. Free community tier.', cat: 'OSINT (legal)' },
-  { name: 'urlscan.io', url: 'https://urlscan.io', desc: 'Scan any URL: see where it really goes and what it loads. Paste shady links here first.', cat: 'OSINT (legal)' },
-  { name: 'crt.sh', url: 'https://crt.sh', desc: 'Certificate transparency search: every TLS cert ever issued for a domain.', cat: 'OSINT (legal)' },
-  { name: 'DNSDumpster', url: 'https://dnsdumpster.com', desc: 'Free DNS recon: subdomains, MX and TXT records mapped visually.', cat: 'OSINT (legal)' },
-  { name: 'MXToolbox', url: 'https://mxtoolbox.com', desc: 'DNS + mail diagnostics: blacklist, SPF and DMARC checks.', cat: 'OSINT (legal)' },
-  { name: 'Epieos', url: 'https://epieos.com', desc: 'Free email/phone lookup that finds linked accounts, no signup.', cat: 'OSINT (legal)' },
-  { name: 'WhatsMyName', url: 'https://whatsmyname.me', desc: 'Check a username across hundreds of sites in one click.', cat: 'OSINT (legal)' },
-  { name: 'Sherlock', url: 'https://github.com/sherlock-project/sherlock', desc: 'Famous open-source username hunter. Terminal-based, free forever.', cat: 'OSINT (legal)' },
-  { name: 'Holehe', url: 'https://github.com/megadose/holehe', desc: 'Checks if an email is registered on 120+ sites. Use on your own audits.', cat: 'OSINT (legal)' },
-  { name: 'TinEye', url: 'https://tineye.com', desc: 'Reverse image search: find where a photo appeared online.', cat: 'OSINT (legal)' },
-  { name: 'Yandex Images', url: 'https://yandex.com/images', desc: 'Often the strongest reverse image search for places and faces.', cat: 'OSINT (legal)' },
-  { name: 'FotoForensics', url: 'https://fotoforensics.com', desc: 'Error-level analysis that reveals edited regions in photos.', cat: 'OSINT (legal)' },
-  { name: 'Exif.tools', url: 'https://exif.tools', desc: 'Read photo metadata (camera, GPS) right in the browser.', cat: 'OSINT (legal)' },
-  { name: 'FlightRadar24', url: 'https://www.flightradar24.com', desc: 'Live flight tracking worldwide. Generous free tier.', cat: 'OSINT (legal)' },
-  { name: 'MarineTraffic', url: 'https://www.marinetraffic.com', desc: 'Live ship positions — FlightRadar for boats.', cat: 'OSINT (legal)' },
-  { name: 'OpenCorporates', url: 'https://opencorporates.com', desc: 'Largest open company database: officers, filings, networks.', cat: 'OSINT (legal)' },
-  { name: 'Hunter.io', url: 'https://hunter.io', desc: 'Find public work emails by domain. Free searches each month.', cat: 'OSINT (legal)' },
-  { name: 'OTX AlienVault', url: 'https://otx.alienvault.com', desc: 'Open threat-intel sharing: IPs, domains and hashes with context.', cat: 'OSINT (legal)' },
-  { name: 'AbuseIPDB', url: 'https://www.abuseipdb.com', desc: 'Check whether an IP is reported for abuse. Free lookups.', cat: 'OSINT (legal)' },
-  { name: 'GreyNoise', url: 'https://viz.greynoise.io', desc: 'Tells you if an IP scanning you is background noise or targeted.', cat: 'OSINT (legal)' },
-  { name: 'Google Advanced Search', url: 'https://www.google.com/advanced_search', desc: 'Point-and-click Google dorks: filetype, site: and date filters.', cat: 'OSINT (legal)' },
-]
-
-const CAT_DESC = {
-  'Security': 'Stay safe: breach checks, malware scans, password managers, 2FA lookups.',
-  'Adblock & Privacy': 'Kill ads + trackers, test your setup, and take back inbox and chats.',
-  'Simulators & Playgrounds': 'Circuits, physics, space, radio — interactive toys that teach real things.',
-  'Reddit Gems': 'Subreddits that actually teach you things or surface free stuff.',
-  'Free Hosting': 'Ship your own site/app for $0 — all have real free tiers.',
-  'Free AI': 'Chatbots, search, and model hubs you can use without paying.',
-  'Everyday Utils': 'One-click problem solvers: files, math, prices, downtime, learning.',
-  'Files': 'Share files and notes that delete themselves.',
-  'Dev': 'Learn faster and sketch ideas for free.',
-  'Media': 'Edit images and grab media without installs or watermarks.',
-  'Watch (legal)': 'Free + licensed streaming only. No pirate sites here — they mean malware + takedowns.',
-  'Shops & Deals': 'Spend smarter: indie storefronts, handmade goods and refurbished tech.',
-  'Create & Design': 'Make things: design, photos, video, AI voices — free tiers that actually deliver.',
-  'Learn': 'Free courses, lectures and books — from MIT lectures to Duolingo streaks.',
-  'OSINT (legal)': 'Open-source intelligence with public data only — research, verification, CTFs. Get consent / check local law before looking up real people.',
-  'My Stuff': 'Sites you added yourself. Stored in this browser only.',
-}
+import { SMS_SITES, EMAIL_PROVIDERS, COOL_SITES, CAT_DESC, RECOMMENDED } from './data/directory.js'
 
 function SectionHead({ title, desc }) {
   return (
@@ -343,12 +108,6 @@ function SectionHead({ title, desc }) {
   )
 }
 
-/* Hand-picked essentials — shown in a Recommended section on top of Cool Sites */
-const RECOMMENDED = new Set([
-  'uBlock Origin', 'Bitwarden', 'TinyWow', 'Photopea', 'Falstad Circuit Simulator',
-  'Wokwi', 'Hugging Face', 'Cloudflare Pages', 'Wayback Machine', 'Radio Garden',
-  'urlscan.io', 'Have I Been Pwned', 'buyelias.com', 'Modrinth', 'Cobalt',
-])
 
 function copy(text) {
   navigator.clipboard?.writeText(text).catch(() => {})
@@ -393,7 +152,7 @@ function Home({ go }) {
           <button className="ghost" onClick={() => go('settings')}><SettingsIcon size={15} className="btnIcon" /> Customize theme</button>
         </div>
       </div>
-      <SectionHead title="What lives here" desc="Ten sections, each with its own job. Hover nothing — just click and go." />
+      <SectionHead title="What lives here" desc="Eleven sections, each with its own job. Hover nothing — just click and go." />
       <div className="cards">
         <div className="card"><h3><Mail size={16} className="hicon" /> Temp Email</h3><p>Real 1secmail inbox in-browser with automatic proxy fallback. Copy an address, receive mail, refresh live.</p><button className="ghost" onClick={() => go('email')}>Open →</button></div>
         <div className="card"><h3><Smartphone size={16} className="hicon" /> Temp Numbers</h3><p>Free public SMS receivers for OTPs anyone can read, plus paid private rentals for sensitive codes. Safety notes included.</p><button className="ghost" onClick={() => go('numbers')}>Open →</button></div>
@@ -405,6 +164,7 @@ function Home({ go }) {
         <div className="card"><h3><Gamepad2 size={16} className="hicon" /> Mods</h3><p>Mod hubs for FiveM, Minecraft, GTA V, Bethesda, Sims + the managers that install them. Safety notes included.</p><button className="ghost" onClick={() => go('mods')}>Open →</button></div>
         <div className="card"><h3><Download size={16} className="hicon" /> Downloader</h3><p>YouTube MP3/MP4 via copy-paste yt-dlp commands + no-install tools like Cobalt.</p><button className="ghost" onClick={() => go('download')}>Open →</button></div>
         <div className="card"><h3><Laptop size={16} className="hicon" /> Software</h3><p>Essential free apps: Firefox, VLC, OBS, PowerToys, VS Code, Steam, Heroic and more.</p><button className="ghost" onClick={() => go('software')}>Open →</button></div>
+        <div className="card"><h3><Send size={16} className="hicon" /> Recommend</h3><p>Found something cool? Send the link + description — it lands in the owner inbox for review.</p><button className="ghost" onClick={() => go('recommend')}>Open →</button></div>
       </div>
       <div className="card">
         <h3><ShieldCheck size={16} className="hicon" /> House rules</h3>
@@ -1327,83 +1087,7 @@ function Tools({ settings, update }) {
 }
 
 /* ---------- Mods hub ---------- */
-const MOD_GAMES = [
-  {
-    game: 'FiveM (GTA RP)', desc: 'Servers, scripts, cars and maps for FiveM roleplay. Stick to the official forum + big releases.',
-    sites: [
-      { name: 'Cfx.re Forum — Releases', url: 'https://forum.cfx.re/c/development/releases/7', desc: 'Official FiveM forum. Free scripts, maps, vehicles from the community.' },
-      { name: 'GTA5-Mods.com', url: 'https://www.gta5-mods.com', desc: 'Huge GTA V mod library — many car/map mods work as FiveM resources.' },
-      { name: 'FiveM Docs', url: 'https://docs.fivem.net', desc: 'Server setup + scripting reference for future server owners.' },
-    ],
-  },
-  {
-    game: 'Minecraft', desc: 'Mods, modpacks and loaders. Modrinth > CurseForge if you hate ads.',
-    sites: [
-      { name: 'Modrinth', url: 'https://modrinth.com/mods', desc: 'Open-source, no ads, fast. Mods, datapacks, shaders, plugins.' },
-      { name: 'CurseForge', url: 'https://www.curseforge.com/minecraft', desc: 'The biggest catalog: mods + modpacks. Pair with the CurseForge app.' },
-      { name: 'Planet Minecraft', url: 'https://www.planetminecraft.com', desc: 'Skins, texture packs, maps and builds from the community.' },
-      { name: 'OptiFine', url: 'https://optifine.net/downloads', desc: 'FPS boost + shader support. Only download from the official site.' },
-      { name: 'Fabric', url: 'https://fabricmc.net', desc: 'Lightweight modern mod loader. Check NeoForge too for 1.20+.' },
-      { name: 'Sodium', url: 'https://modrinth.com/mod/sodium', desc: 'Massive FPS boost, open source. The modern OptiFine alternative.' },
-      { name: 'Iris Shaders', url: 'https://irisshaders.net', desc: 'Beautiful shaders that pair perfectly with Sodium.' },
-      { name: 'Lunar Client', url: 'https://www.lunarclient.com', desc: 'PvP-focused client with performance mods built in. Free.' },
-      { name: 'Feed The Beast', url: 'https://www.feed-the-beast.com', desc: 'Legendary modpacks with their own launcher app.' },
-      { name: 'Technic', url: 'https://www.technicpack.net', desc: 'Classic modpack platform, still kicking.' },
-    ],
-  },
-  {
-    game: 'GTA V (story mode)', desc: 'Script mods, cars, graphics overhauls. Story mode / FiveM only — modding gets you banned in GTA Online.',
-    sites: [
-      { name: 'GTA5-Mods.com', url: 'https://www.gta5-mods.com', desc: 'The GTA V mod home: scripts, vehicles, maps, visuals.' },
-      { name: 'LCPDFR', url: 'https://www.lcpdfr.com', desc: 'Play as police: LSPDFR + ELS mods and support forums.' },
-      { name: 'OpenIV', url: 'https://openiv.com', desc: 'Essential tool for browsing and editing GTA archives.' },
-      { name: 'Script Hook V', url: 'http://dev-c.com/GTAV/scripthookv/', desc: "Alexander Blade's hook that .asi script mods require. Official mirror only." },
-      { name: 'GTAForums', url: 'https://gtaforums.com', desc: 'Two decades of modding discussion, work-in-progress mods and releases.' },
-    ],
-  },
-  {
-    game: 'Bethesda (Skyrim, Fallout)', desc: 'The Nexus ecosystem. Use a real mod manager, not manual drops.',
-    sites: [
-      { name: 'Nexus Mods', url: 'https://www.nexusmods.com', desc: 'Millions of Skyrim/Fallout/Cyberpunk mods. Free account, optional premium.' },
-      { name: 'Bethesda.net Mods', url: 'https://bethesda.net/en/mods', desc: 'Official in-game mod browser, console-friendly.' },
-      { name: 'SKSE', url: 'https://skse.silverlock.org', desc: 'Skyrim Script Extender — half of all Skyrim mods need this.' },
-      { name: 'F4SE', url: 'https://f4se.silverlock.org', desc: 'Same deal for Fallout 4. Check version match after game updates.' },
-      { name: 'Wabbajack', url: 'https://www.wabbajack.org', desc: 'One-click auto-installed modlists. Insanely good, free.' },
-    ],
-  },
-  {
-    game: 'The Sims 4', desc: 'Custom content, script mods and builds.',
-    sites: [
-      { name: 'The Sims Resource', url: 'https://www.thesimsresource.com', desc: 'Largest Sims CC library: hair, clothes, lots, makeup.' },
-      { name: 'ModTheSims', url: 'https://modthesims.info', desc: 'Long-running community hub for mods and tuning.' },
-      { name: 'CurseForge — Sims 4', url: 'https://www.curseforge.com/sims4', desc: 'Newer official-style hub with app support.' },
-      { name: "Carl's Guides", url: 'https://www.carls-sims-4-guide.com', desc: 'Best Sims 4 guides plus curated mod recommendations.' },
-      { name: 'SimsVIP', url: 'https://simsvip.com', desc: 'News, patch notes and custom-content finds.' },
-    ],
-  },
-  {
-    game: 'Everything else', desc: 'Multi-game hubs covering thousands of titles.',
-    sites: [
-      { name: 'GameBanana', url: 'https://gamebanana.com', desc: 'Mods for CS, TF2, Zelda, Smash and hundreds more.' },
-      { name: 'ModDB', url: 'https://www.moddb.com', desc: 'Classic hub: mods, indie games and addons since forever.' },
-      { name: 'Steam Workshop', url: 'https://store.steampowered.com/about/workshops', desc: 'One-click subscribe mods inside Steam. Safest source for Steam games.' },
-      { name: 'itch.io', url: 'https://itch.io', desc: 'Indie games, romhacks, fan games and moddable jam entries.' },
-      { name: 'Thunderstore', url: 'https://thunderstore.io', desc: 'Modded servers + mods: Valheim, Lethal Company, Risk of Rain and more.' },
-      { name: 'ModWorkshop', url: 'https://modworkshop.net', desc: 'Newer community hub covering various games.' },
-    ],
-  },
-  {
-    game: 'Mod managers', desc: 'Install these before touching a single zip. They handle load order, conflicts and uninstalls.',
-    sites: [
-      { name: 'Vortex (Nexus)', url: 'https://www.nexusmods.com/about/vortex/', desc: 'Beginner-friendly manager for Nexus games.' },
-      { name: 'Mod Organizer 2', url: 'https://github.com/ModOrganizer2/modorganizer', desc: 'Power-user Bethesda manager. Keeps your game folder clean.' },
-      { name: 'Prism Launcher', url: 'https://prismlauncher.org', desc: 'Open-source Minecraft launcher: instances, Modrinth + CurseForge built in.' },
-      { name: 'CurseForge App', url: 'https://www.curseforge.com/download/app', desc: 'One-click Minecraft/WoW modpacks. Easiest start.' },
-      { name: 'Modrinth App', url: 'https://modrinth.com/app', desc: 'Official open-source Minecraft launcher from the Modrinth team.' },
-      { name: 'ATLauncher', url: 'https://atlauncher.com', desc: 'Classic Minecraft instances + modpacks, open source.' },
-    ],
-  },
-]
+import { MOD_GAMES, DL_TOOLS, SOFTWARE } from './data/hubs.js'
 
 function Mods({ query }) {
   const q = query.toLowerCase()
@@ -1435,13 +1119,6 @@ function Mods({ query }) {
 }
 
 /* ---------- Downloader (yt-dlp command generator + tools) ---------- */
-const DL_TOOLS = [
-  { name: 'Cobalt', url: 'https://cobalt.tools', desc: 'Paste a link (YouTube, TikTok, X…), download MP4/MP3 in browser. No install, no watermark.' },
-  { name: 'yt-dlp', url: 'https://github.com/yt-dlp/yt-dlp', desc: 'The command-line king: 1000+ sites, best quality, playlists, subs. Free forever.' },
-  { name: '4K Video Downloader', url: 'https://www.4kdownload.com', desc: 'Desktop app with a simple paste-and-go UI. Free tier covers casual use.' },
-  { name: 'MediaHuman', url: 'https://www.mediahuman.com', desc: 'Clean YouTube-to-MP3/MP4 converter app. No browser popups.' },
-  { name: 'Seal (Android)', url: 'https://github.com/JunkFood02/Seal', desc: 'Free open-source Android downloader powered by yt-dlp.' },
-]
 
 function Downloader() {
   const [url, setUrl] = useState('')
@@ -1498,67 +1175,6 @@ function Downloader() {
 }
 
 /* ---------- Essential software ---------- */
-const SOFTWARE = [
-  {
-    group: 'Browsers', desc: 'Your window to the internet. Pick one that respects you.',
-    apps: [
-      { name: 'Firefox', url: 'https://www.mozilla.org/firefox/new/', desc: 'Independent, private, extension-friendly. The power-user default.' },
-      { name: 'Brave', url: 'https://brave.com', desc: 'Chromium speed without Google + built-in adblock.' },
-    ],
-  },
-  {
-    group: 'Media', desc: 'Play, record and convert anything.',
-    apps: [
-      { name: 'VLC', url: 'https://www.videolan.org', desc: 'Plays literally everything. Free forever, no codecs needed.' },
-      { name: 'OBS Studio', url: 'https://obsproject.com', desc: 'Record and stream like a pro. Free, open source.' },
-      { name: 'Audacity', url: 'https://www.audacityteam.org', desc: 'Free audio editor for podcasts, memes and voiceovers.' },
-      { name: 'ShareX', url: 'https://getsharex.com', desc: 'Screenshots, GIFs, screen recordings with instant upload. Windows power tool.' },
-      { name: 'HandBrake', url: 'https://handbrake.fr', desc: 'Convert and shrink any video. Free and fast.' },
-    ],
-  },
-  {
-    group: 'Utilities', desc: 'Small apps that make Windows (or any OS) way better.',
-    apps: [
-      { name: 'Everything', url: 'https://www.voidtools.com', desc: 'Find any file on Windows instantly as you type.' },
-      { name: 'PowerToys', url: 'https://github.com/microsoft/PowerToys', desc: "Microsoft's own power tools: FancyZones, PowerRename, color picker." },
-      { name: '7-Zip', url: 'https://www.7-zip.org', desc: 'Open any archive. Tiny, free, no nag screens.' },
-      { name: 'Notepad++', url: 'https://notepad-plus-plus.org', desc: 'Notepad on steroids for code, logs and quick notes.' },
-      { name: 'EarTrumpet', url: 'https://github.com/File-New-Project/EarTrumpet', desc: 'Per-app volume control Windows should have built in.' },
-      { name: 'AutoHotkey', url: 'https://www.autohotkey.com', desc: 'Automate keys and clicks with tiny scripts.' },
-    ],
-  },
-  {
-    group: 'Dev tools', desc: 'Write code, manage versions, run things.',
-    apps: [
-      { name: 'VS Code', url: 'https://code.visualstudio.com', desc: 'The editor everyone uses. Free with a huge extension market.' },
-      { name: 'Git', url: 'https://git-scm.com', desc: 'Version control. Learn five commands and you are set.' },
-      { name: 'Python', url: 'https://www.python.org/downloads/', desc: 'Easiest first language with libraries for everything.' },
-      { name: 'Node.js', url: 'https://nodejs.org', desc: 'JavaScript outside the browser. Powers this very site.' },
-      { name: 'Windows Terminal', url: 'https://github.com/microsoft/terminal', desc: 'Modern tabbed terminal. Grab it from the Microsoft Store.' },
-    ],
-  },
-  {
-    group: 'Gaming', desc: 'Stores and library managers.',
-    apps: [
-      { name: 'Steam', url: 'https://store.steampowered.com/about/', desc: 'The PC game store. Wishlist everything, buy on seasonal sales.' },
-      { name: 'Heroic Launcher', url: 'https://heroicgameslauncher.com', desc: 'Open-source Epic + GOG launcher for Windows and Linux.' },
-      { name: 'Playnite', url: 'https://playnite.link', desc: 'Every game library in one pretty shelf. Free, open source.' },
-    ],
-  },
-  {
-    group: 'Chat & mail', desc: 'Talk to humans.',
-    apps: [
-      { name: 'Discord', url: 'https://discord.com/download', desc: 'Voice, servers, streaming. Where every community lives.' },
-      { name: 'Thunderbird', url: 'https://www.thunderbird.net', desc: 'Free desktop email that respects you. Handles all providers.' },
-    ],
-  },
-  {
-    group: 'Security', desc: 'Second opinions for your PC.',
-    apps: [
-      { name: 'Malwarebytes Free', url: 'https://www.malwarebytes.com/mwb-download', desc: 'On-demand malware scans. Free tier is enough as backup.' },
-    ],
-  },
-]
 
 function Software({ query }) {
   const q = query.toLowerCase()
@@ -1584,6 +1200,89 @@ function Software({ query }) {
         </div>
       ))}
       {groups.length === 0 && <p className="muted">No matches. Try "browser", "video" or "terminal".</p>}
+    </>
+  )
+}
+
+/* ---------- Recommend a site (delivered by email via FormSubmit) ----------
+   Static sites can't send mail alone, so submissions POST to FormSubmit's
+   free endpoint, which forwards them to the owner inbox. The very first
+   submission triggers an activation email the owner must confirm once. */
+function Recommend() {
+  const [form, setForm] = useState({ site: '', name: '', desc: '', notes: '', from: '' })
+  const [status, setStatus] = useState('idle')
+  const [msg, setMsg] = useState('')
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+
+  const send = async () => {
+    if (!form.site.trim() || !form.desc.trim()) {
+      setStatus('error')
+      setMsg('Site URL + description are required — otherwise it is a mystery link.')
+      return
+    }
+    let site = form.site.trim()
+    if (!/^https?:\/\//i.test(site)) site = 'https://' + site
+    try { new URL(site) } catch {
+      setStatus('error')
+      setMsg('That URL looks invalid. Copy it straight from the address bar.')
+      return
+    }
+    setStatus('sending')
+    setMsg('')
+    try {
+      const res = await fetch('https://formsubmit.co/ajax/sianellingsen@gmail.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          _subject: `LootCave recommendation: ${form.name.trim() || site}`,
+          _template: 'table',
+          _captcha: 'false',
+          _honey: '',
+          'Site URL': site,
+          'Site name': form.name.trim() || '(not given)',
+          Description: form.desc.trim(),
+          Notes: form.notes.trim() || '(none)',
+          From: form.from.trim() || '(anonymous)',
+        }),
+      })
+      if (!res.ok) throw new Error('HTTP ' + res.status)
+      setStatus('sent')
+      setForm({ site: '', name: '', desc: '', notes: '', from: '' })
+      logEvent('recommend', 'recommendation sent')
+    } catch (e) {
+      setStatus('error')
+      setMsg('Could not send: ' + String(e.message).slice(0, 160) + '. Check connection and retry.')
+      logEvent('recommend', 'send failed: ' + e.message)
+    }
+  }
+
+  return (
+    <>
+      <SectionHead title="Recommend a site" desc="Found something that belongs in the cave? Drop the link, say what it is and why it's cool. Your suggestion is emailed straight to the owner for review." />
+      <div className="grid2">
+        <div className="card big">
+          <h3><Send size={16} className="hicon" /> Suggest a site</h3>
+          <input value={form.site} onChange={set('site')} placeholder="Site URL (https://…)" inputMode="url" />
+          <input value={form.name} onChange={set('name')} placeholder="Site name" />
+          <textarea rows="3" value={form.desc} onChange={set('desc')} placeholder="What is it? Why should it be listed?" />
+          <textarea rows="2" value={form.notes} onChange={set('notes')} placeholder="Extra notes (optional): category it fits, free tier details…" />
+          <input value={form.from} onChange={set('from')} placeholder="Your name/handle (optional)" />
+          <div className="btnRow">
+            <button onClick={send} disabled={status === 'sending'}><Send size={15} className="btnIcon" /> {status === 'sending' ? 'Sending…' : 'Send recommendation'}</button>
+          </div>
+          {status === 'sent' && <p className="muted">Sent! The owner reviews every suggestion before it goes live. Suggest another any time.</p>}
+          {status === 'error' && <p className="err">{msg}</p>}
+        </div>
+        <div className="card">
+          <h3>How this works</h3>
+          <ul className="tips">
+            <li><b>Reviewed by a human.</b> Nothing auto-publishes — good picks get added manually.</li>
+            <li><b>What gets in:</b> free, useful, legal. Same bar as the rest of the directory.</li>
+            <li><b>What doesn't:</b> pirate streams, "free Robux" scams, referral spam.</li>
+            <li><b>First-time note:</b> the delivery service asks the owner to confirm once before the first email arrives.</li>
+          </ul>
+        </div>
+      </div>
     </>
   )
 }
@@ -1968,11 +1667,12 @@ export default function App() {
         {tab === 'mods' && <Mods query={query} />}
         {tab === 'download' && <Downloader />}
         {tab === 'software' && <Software query={query} />}
+        {tab === 'recommend' && <Recommend />}
         {tab === 'tools' && <Tools settings={settings} update={update} />}
         {tab === 'settings' && <Settings settings={settings} update={update} reset={() => setSettings(DEFAULT_SETTINGS)} />}
         {tab === 'admin' && <Admin customSites={customSites} onDeleteSite={delSite} onWipe={wipe} />}
       </main>
-      <footer>runs on <code>npm run dev</code> · static only, no backend · stay safe out there</footer>
+      <footer>© 2026 LootCave — built for fun, use responsibly · static only, no backend</footer>
     </div>
   )
 }
