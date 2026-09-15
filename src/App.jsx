@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Binary, CaseSensitive, ClipboardList, Clock, Coffee, Copy, Dices, Download, ExternalLink,
-  Fingerprint, FileJson, Flower2, Gamepad2, Gem, Globe, HardDrive, Hash, Home as HomeIcon, IdCard, KeyRound,
+  Fingerprint, FileJson, Flower2, Gamepad2, Gem, Globe, HardDrive, Hash, Home as HomeIcon, IdCard, Images, KeyRound,
   Laptop, Link2, Lock, Mail, Moon, MousePointerClick, Music, Palette, Pencil, Plus, QrCode,
   RefreshCw, RotateCcw,   Ruler, Scale, ScanSearch, Settings as SettingsIcon, ShieldCheck, Smartphone, Snowflake, Sparkles,
   Star, Sun, Sunset, Target, Terminal, TextQuote, Timer, TriangleAlert, Tv, Waves, Wifi, Wrench, Zap,
@@ -247,6 +247,31 @@ const COOL_SITES = [
   { name: 'buyelias.com', url: 'https://buyelias.com', desc: 'Indie storefront worth a look — small shops like this beat megastores for unique finds.', cat: 'Shops & Deals' },
   { name: 'Etsy', url: 'https://www.etsy.com', desc: 'Handmade, vintage and custom goods from independent sellers.', cat: 'Shops & Deals' },
   { name: 'Back Market', url: 'https://www.backmarket.com', desc: 'Refurbished phones, laptops and consoles with warranty. Cheaper + greener.', cat: 'Shops & Deals' },
+  { name: 'DeepL', url: 'https://www.deepl.com/translator', desc: 'The most accurate free translator. Generous free tier, 30+ languages.', cat: 'Everyday Utils' },
+  { name: 'Google Translate', url: 'https://translate.google.com', desc: 'Translate text, docs, images and whole sites. Camera mode is magic abroad.', cat: 'Everyday Utils' },
+  { name: 'Timeanddate', url: 'https://www.timeanddate.com', desc: 'World clocks, time-zone converter, countdowns and calendars.', cat: 'Everyday Utils' },
+  { name: 'XE Currency', url: 'https://www.xe.com', desc: 'Live exchange rates and a converter that just works.', cat: 'Everyday Utils' },
+  { name: 'Sleepytime', url: 'https://sleepyti.me', desc: 'Tells you when to sleep/wake to rise between cycles, not mid-cycle.', cat: 'Everyday Utils' },
+  { name: 'DownDetector', url: 'https://downdetector.com', desc: 'Is Discord/Spotify down for everyone? Live outage maps say so.', cat: 'Everyday Utils' },
+  { name: 'WhatTheFont', url: 'https://www.myfonts.com/pages/whatthefont', desc: 'Upload a screenshot, identify the font. Designer essential.', cat: 'Everyday Utils' },
+  { name: 'SwissTransfer', url: 'https://www.swisstransfer.com', desc: 'Send up to 50GB free, no account. Swiss privacy included.', cat: 'Files' },
+  { name: 'StackBlitz', url: 'https://stackblitz.com', desc: 'Full dev environment in a browser tab. Prototype anything in seconds.', cat: 'Dev' },
+  { name: 'GitHub Gist', url: 'https://gist.github.com', desc: 'Share code snippets and notes with version history. Pastebin for devs.', cat: 'Dev' },
+  { name: 'JSONPlaceholder', url: 'https://jsonplaceholder.typicode.com', desc: 'Free fake REST API for testing frontends. Zero setup.', cat: 'Dev' },
+  { name: 'Lorem Picsum', url: 'https://picsum.photos', desc: 'Placeholder images via URL: size, grayscale, blur params included.', cat: 'Dev' },
+  { name: 'Shields.io', url: 'https://shields.io', desc: 'Those little badges on GitHub READMEs — generate your own.', cat: 'Dev' },
+  { name: 'Pixabay', url: 'https://pixabay.com', desc: 'Free stock photos, videos and music. No attribution needed.', cat: 'Create & Design' },
+  { name: 'Kapwing', url: 'https://www.kapwing.com', desc: 'Online video editor: memes, subtitles, resizing. Free tier works.', cat: 'Create & Design' },
+  { name: 'Coursera', url: 'https://www.coursera.org', desc: 'University courses you can audit free. Certificates cost extra.', cat: 'Learn' },
+  { name: 'edX', url: 'https://www.edx.org', desc: 'Harvard/MIT-backed free courses across everything.', cat: 'Learn' },
+  { name: 'Leonardo.ai', url: 'https://leonardo.ai', desc: 'AI image generation with daily free tokens. Great for thumbnails.', cat: 'Free AI' },
+  { name: 'Suno', url: 'https://suno.com', desc: 'Type a prompt, get a full AI song. Free credits daily.', cat: 'Free AI' },
+  { name: 'Gamma', url: 'https://gamma.app', desc: 'AI presentations, docs and sites from one prompt. Free tier.', cat: 'Free AI' },
+  { name: 'SimpleLogin', url: 'https://simplelogin.io', desc: 'Free email aliases that forward to your real inbox. Made by Proton.', cat: 'Adblock & Privacy' },
+  { name: 'addy.io', url: 'https://addy.io', desc: 'Anonymous email forwarding with a generous free tier. Pairs with temp mail.', cat: 'Adblock & Privacy' },
+  { name: 'r/coolgithubprojects', url: 'https://www.reddit.com/r/coolgithubprojects/', desc: 'Hidden GitHub gems surface here before they blow up.', cat: 'Reddit Gems' },
+  { name: 'r/InternetIsBeautiful', url: 'https://www.reddit.com/r/InternetIsBeautiful/', desc: 'Genuinely beautiful and useful websites, curated daily.', cat: 'Reddit Gems' },
+  { name: 'YouTube', url: 'https://www.youtube.com', desc: 'Free movies section plus everything else. Pairs with the Downloader tab.', cat: 'Watch (legal)' },
   { name: 'GitHub', url: 'https://github.com', desc: 'Home of open source. Host code, ship Pages sites, find free tools.', cat: 'Dev' },
   { name: 'CodePen', url: 'https://codepen.io', desc: 'Try HTML/CSS/JS ideas live in the browser. Infinite tricks to learn from.', cat: 'Dev' },
   { name: 'Unsplash', url: 'https://unsplash.com', desc: 'Gorgeous free photos for wallpapers and projects.', cat: 'Create & Design' },
@@ -618,7 +643,7 @@ function CoolSites({ query, customSites, onAdd, onDelete }) {
   const siteCard = (s) => (
     <div key={s.name + s.url} className="card linkWrap">
       <a className="linkMain" href={s.url} target="_blank" rel="noreferrer">
-                <h3>{s.name} {s.custom ? <Pencil size={13} className="hicon" /> : <ExternalLink size={13} className="hicon" />} {RECOMMENDED.has(s.name) && <span className="recBadge"><Star size={11} /> Recommended</span>}</h3>
+                <h3>{s.name} {s.custom ? <Pencil size={13} className="hicon" /> : <ExternalLink size={13} className="hicon" />} {RECOMMENDED.has(s.name) && <span className="recBadge" title="Recommended"><Star size={11} /></span>}</h3>
         <p>{s.desc}</p>
       </a>
       {s.custom && <button className="ghost sm" onClick={() => onDelete(s.url)}>remove</button>}
@@ -1100,6 +1125,147 @@ function PwCheckTool() {
   )
 }
 
+/* ---------- Image downloader: single image or whole-page scan ----------
+   Hotlink protection / CORS blocks some hosts — the tool retries each
+   grab direct, then through two public CORS proxies. */
+const IMG_ROUTES = [
+  { id: 'direct', label: 'direct', wrap: (u) => u },
+  { id: 'allorigins', label: 'allorigins', wrap: (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u) },
+  { id: 'corsproxy', label: 'corsproxy.io', wrap: (u) => 'https://corsproxy.io/?url=' + encodeURIComponent(u) },
+]
+
+function filenameFromUrl(u) {
+  try {
+    const p = new URL(u).pathname.split('/').pop().split('?')[0]
+    return p || 'image'
+  } catch { return 'image' }
+}
+
+function ImageTool() {
+  const [url, setUrl] = useState('')
+  const [mode, setMode] = useState('single')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [info, setInfo] = useState('')
+  const [preview, setPreview] = useState('')
+  const [found, setFound] = useState([])
+
+  const saveBlob = async (src) => {
+    setBusy(true)
+    setErr('')
+    try {
+      let blob = null
+      let route = ''
+      const errors = []
+      for (const r of IMG_ROUTES) {
+        try {
+          const res = await fetch(r.wrap(src))
+          if (!res.ok) throw new Error('HTTP ' + res.status)
+          blob = await res.blob()
+          route = r.label
+          break
+        } catch (e) { errors.push(r.label + ': ' + e.message) }
+      }
+      if (!blob) throw new Error(errors.join(' | '))
+      const obj = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = obj
+      a.download = filenameFromUrl(src)
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      setTimeout(() => URL.revokeObjectURL(obj), 5000)
+      setInfo(`Saved via ${route}.`)
+      logEvent('tools', `image saved via ${route}`)
+    } catch (e) {
+      setErr('Download failed on every route: ' + String(e.message).slice(0, 220))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const previewOne = () => {
+    const u = url.trim()
+    if (!u) { setErr('Paste an image URL first.'); return }
+    setErr('')
+    setInfo('')
+    setFound([])
+    setPreview(/^https?:\/\//i.test(u) ? u : 'https://' + u)
+  }
+
+  const scanPage = async () => {
+    let page = url.trim()
+    if (!page) { setErr('Paste a page URL first.'); return }
+    if (!/^https?:\/\//i.test(page)) page = 'https://' + page
+    setBusy(true)
+    setErr('')
+    setInfo('')
+    setFound([])
+    setPreview('')
+    try {
+      let html = ''
+      const errors = []
+      for (const r of IMG_ROUTES) {
+        try {
+          const res = await fetch(r.wrap(page))
+          if (!res.ok) throw new Error('HTTP ' + res.status)
+          html = await res.text()
+          break
+        } catch (e) { errors.push(r.label + ': ' + e.message) }
+      }
+      if (!html) throw new Error(errors.join(' | '))
+      const doc = new DOMParser().parseFromString(html, 'text/html')
+      const srcs = [...doc.querySelectorAll('img')].map((i) => i.getAttribute('src')).filter(Boolean)
+      const abs = [...new Set(srcs.map((s) => {
+        try {
+          const u = new URL(s, page).href
+          return /^https?:/.test(u) && !u.startsWith('data:') ? u : null
+        } catch { return null }
+      }).filter(Boolean))]
+      setFound(abs.slice(0, 40))
+      setInfo(abs.length ? `${abs.length} image${abs.length === 1 ? '' : 's'} found — click any thumbnail to save it.` : 'No images found on that page.')
+      logEvent('tools', `page scan: ${abs.length} images`)
+    } catch (e) {
+      setErr('Could not read that page: ' + String(e.message).slice(0, 220))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const go = () => {
+    if (mode === 'single') previewOne()
+    else scanPage()
+  }
+
+  return (
+    <div className="card">
+      <h3><Images size={16} className="hicon" /> Image downloader</h3>
+      <p className="muted">Save one image by URL — or scan a whole page and pick from every image on it. Some hosts block hotlinking; the tool retries via proxies automatically.</p>
+      <div className="btnRow">
+        <button className={mode === 'single' ? '' : 'ghost sm'} onClick={() => setMode('single')}>Single image</button>
+        <button className={mode === 'page' ? '' : 'ghost sm'} onClick={() => setMode('page')}>Whole page</button>
+      </div>
+      <input value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && go()} placeholder={mode === 'single' ? 'https://example.com/photo.jpg' : 'https://example.com/gallery'} />
+      <div className="btnRow">
+        <button onClick={go} disabled={busy}>{busy ? 'Working…' : mode === 'single' ? 'Preview' : 'Scan page'}</button>
+        {preview && <button className="ghost sm" onClick={() => saveBlob(preview)}>Download this one</button>}
+      </div>
+      {err && <p className="err">{err}</p>}
+      {info && <p className="muted">{info}</p>}
+      {preview && <img className="imgPreview" src={preview} alt="preview" onError={(e) => { e.currentTarget.src = IMG_ROUTES[1].wrap(preview) }} />}
+      {found.length > 0 && (
+        <div className="imgGrid">
+          {found.map((src) => (
+            <img key={src} className="imgThumb" src={src} alt="" loading="lazy" title={filenameFromUrl(src)}
+              onClick={() => saveBlob(src)}
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = IMG_ROUTES[1].wrap(src) }} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Tools({ settings, update }) {
   const [qr, setQr] = useState('https://opencode.ai')
   const [b64in, setB64in] = useState('hello lootcave')
@@ -1154,6 +1320,7 @@ function Tools({ settings, update }) {
           <TimerTool />
           <ChoiceTool />
           <PwCheckTool />
+          <ImageTool />
       </div>
     </>
   )
