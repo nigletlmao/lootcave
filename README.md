@@ -1,4 +1,4 @@
-# LootCave — temp emails, numbers, mods, tools & cool sites
+# LootCave - temp emails, numbers, mods, tools & cool sites
 
 Static React + Vite site. No backend, no tracking, everything free.
 
@@ -17,8 +17,8 @@ AI Website/
 ├── package.json        # project name + dependencies (lucide-react for icons)
 ├── vite.config.js      # build config (you rarely need this)
 ├── public/             # favicon, static assets (copied to dist as-is)
-├── dist/               # build output — generated, never edit, never commit
-├── node_modules/       # dependencies — generated, never touch
+├── dist/               # build output - generated, never edit, never commit
+├── node_modules/       # dependencies - generated, never touch
 └── src/
     ├── main.jsx        # entry point (leave alone)
     ├── index.css       # tiny global styles
