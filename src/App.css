@@ -77,7 +77,13 @@ body {
 .app { display: flex; flex-direction: column; gap: 18px; }
 .top { display: flex; flex-direction: column; gap: 10px; }
 .logoRow { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.logo { font-size: 34px; font-weight: 800; color: var(--head); letter-spacing: -1px; }
+.logo { font-size: 34px; font-weight: 800; color: var(--head); letter-spacing: -1px; display: flex; align-items: center; gap: 10px; }
+.logoIcon { color: var(--accent2); flex-shrink: 0; }
+.hicon { vertical-align: -3px; margin-right: 6px; }
+.tabIcon, .btnIcon { flex-shrink: 0; }
+.tabs button { display: inline-flex; align-items: center; gap: 7px; }
+button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.step { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 8px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 800; margin-right: 6px; vertical-align: 2px; }
 .logo span { color: var(--accent2); }
 .themeQuick { display: flex; gap: 6px; }
 .dot { width: 22px; height: 22px; border-radius: 50%; padding: 0; border: 2px solid transparent; cursor: pointer; }

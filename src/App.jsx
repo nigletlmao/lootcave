@@ -1,45 +1,52 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  Binary, CaseSensitive, ClipboardList, Clock, Coffee, Copy, Dices, Download, ExternalLink,
+  Fingerprint, FileJson, Flower2, Gamepad2, Gem, Globe, HardDrive, Hash, Home as HomeIcon, IdCard, KeyRound,
+  Laptop, Link2, Lock, Mail, Moon, MousePointerClick, Music, Palette, Pencil, Plus, QrCode,
+  RefreshCw, RotateCcw,   Ruler, Scale, ScanSearch, Settings as SettingsIcon, ShieldCheck, Smartphone, Snowflake, Sparkles,
+  Star, Sun, Sunset, Target, Terminal, TextQuote, Timer, TriangleAlert, Tv, Waves, Wifi, Wrench, Zap,
+} from 'lucide-react'
 import './App.css'
 
 const TABS = [
-  { id: 'home', label: 'Home', icon: '🏠' },
-  { id: 'email', label: 'Temp Email', icon: '✉️' },
-  { id: 'numbers', label: 'Temp Numbers', icon: '📱' },
-  { id: 'ids', label: 'Fake IDs', icon: '🪪' },
-  { id: 'sites', label: 'Cool Sites', icon: '🌐' },
-  { id: 'mods', label: 'Mods', icon: '🎮' },
-  { id: 'download', label: 'Downloader', icon: '⬇️' },
-  { id: 'software', label: 'Software', icon: '💻' },
-  { id: 'tools', label: 'Mini Tools', icon: '🛠️' },
-  { id: 'settings', label: 'Settings', icon: '⚙️' },
-  { id: 'admin', label: 'Admin', icon: '🔒' },
+  { id: 'home', label: 'Home', icon: HomeIcon },
+  { id: 'email', label: 'Temp Email', icon: Mail },
+  { id: 'numbers', label: 'Temp Numbers', icon: Smartphone },
+  { id: 'ids', label: 'Fake IDs', icon: IdCard },
+  { id: 'sites', label: 'Cool Sites', icon: Globe },
+  { id: 'mods', label: 'Mods', icon: Gamepad2 },
+  { id: 'download', label: 'Downloader', icon: Download },
+  { id: 'software', label: 'Software', icon: Laptop },
+  { id: 'tools', label: 'Mini Tools', icon: Wrench },
+  { id: 'settings', label: 'Settings', icon: SettingsIcon },
+  { id: 'admin', label: 'Admin', icon: Lock },
 ]
 
 const TAB_BLURBS = {
-  home: '🏠 Start here — what lootcave is, quick jumps to every tool, and the house rules.',
-  email: '✉️ A real disposable inbox in your browser (via 1secmail) + backup providers. Copy an address, receive mail, no signup.',
-  numbers: '📱 Free public SMS receivers for throwaway OTPs + paid private rentals. Read the safety warning first.',
-  ids: '🪪 One-click fake identities for testing signups. Generated locally — nothing leaves your browser.',
-  sites: '🌐 Hand-picked directory: security, adblock, sims, design, learning, Reddit gems, hosting, AI, utils + legal streaming. You can add your own.',
-  mods: '🎮 Mod hubs for FiveM, Minecraft, GTA V, Bethesda games, Sims and more — plus the managers that install them.',
-  download: '⬇️ YouTube & media downloading: copy-paste yt-dlp commands for MP3/MP4 plus the best no-install tools.',
-  software: '💻 Essential free software everyone should have — browsers, media, utilities, dev tools, launchers.',
-  tools: '🛠️ Tiny offline-first utilities: password generator with charset control, UUID, QR codes, Base64.',
-  settings: '⚙️ Make it yours — themes, font size, default tab, inbox refresh speed. Saved in your browser.',
-  admin: '🔒 Behind the scenes — login required. Stats, API health checks, event log, and data controls.',
+  home: 'Start here — what lootcave is, quick jumps to every tool, and the house rules.',
+  email: 'A real disposable inbox in your browser (via 1secmail) + backup providers. Copy an address, receive mail, no signup.',
+  numbers: 'Free public SMS receivers for throwaway OTPs + paid private rentals. Read the safety warning first.',
+  ids: 'One-click fake identities for testing signups. Generated locally — nothing leaves your browser.',
+  sites: 'Hand-picked directory: security, adblock, sims, design, learning, Reddit gems, hosting, AI, utils + legal streaming. You can add your own.',
+  mods: 'Mod hubs for FiveM, Minecraft, GTA V, Bethesda games, Sims and more — plus the managers that install them.',
+  download: 'YouTube & media downloading: copy-paste yt-dlp commands for MP3/MP4 plus the best no-install tools.',
+  software: 'Essential free software everyone should have — browsers, media, utilities, dev tools, launchers.',
+  tools: 'Tiny offline-first utilities: password generator with charset control, UUID, QR codes, Base64.',
+  settings: 'Make it yours — themes, font size, default tab, inbox refresh speed. Saved in your browser.',
+  admin: 'Behind the scenes — login required. Stats, API health checks, event log, and data controls.',
 }
 
 const THEMES = [
-  { id: 'midnight', name: '🌙 Midnight', desc: 'Default dark. Easy on the eyes.' },
-  { id: 'light', name: '☀️ Light', desc: 'Clean bright mode for daytime.' },
-  { id: 'neon', name: '🌃 Neon', desc: 'Cyberpunk pink + cyan on black.' },
-  { id: 'terminal', name: '💻 Terminal', desc: 'Green-on-black hacker mono.' },
-  { id: 'ocean', name: '🌊 Ocean', desc: 'Deep blue, calm vibes.' },
-  { id: 'sunset', name: '🌅 Sunset', desc: 'Warm orange dusk tones.' },
-  { id: 'dracula', name: '🧛 Dracula', desc: 'The famous purple-on-dark editor theme.' },
-  { id: 'nord', name: '❄️ Nord', desc: 'Frosty arctic blues, calm and crisp.' },
-  { id: 'coffee', name: '☕ Coffee', desc: 'Warm sepia browns for late nights.' },
-  { id: 'rose', name: '🌸 Rose', desc: 'Soft light-pink daytime theme.' },
+  { id: 'midnight', name: 'Midnight', icon: Moon, desc: 'Default dark. Easy on the eyes.' },
+  { id: 'light', name: 'Light', icon: Sun, desc: 'Clean bright mode for daytime.' },
+  { id: 'neon', name: 'Neon', icon: Zap, desc: 'Cyberpunk pink + cyan on black.' },
+  { id: 'terminal', name: 'Terminal', icon: Terminal, desc: 'Green-on-black hacker mono.' },
+  { id: 'ocean', name: 'Ocean', icon: Waves, desc: 'Deep blue, calm vibes.' },
+  { id: 'sunset', name: 'Sunset', icon: Sunset, desc: 'Warm orange dusk tones.' },
+  { id: 'dracula', name: 'Dracula', icon: Sparkles, desc: 'The famous purple-on-dark editor theme.' },
+  { id: 'nord', name: 'Nord', icon: Snowflake, desc: 'Frosty arctic blues, calm and crisp.' },
+  { id: 'coffee', name: 'Coffee', icon: Coffee, desc: 'Warm sepia browns for late nights.' },
+  { id: 'rose', name: 'Rose', icon: Flower2, desc: 'Soft light-pink daytime theme.' },
 ]
 
 const DEFAULT_SETTINGS = {
@@ -237,6 +244,9 @@ const COOL_SITES = [
   { name: 'Pluto TV', url: 'https://pluto.tv', desc: 'Free live channels + on-demand, including anime channels.', cat: 'Watch (legal)' },
   { name: 'RetroCrush', url: 'https://www.retrocrush.tv', desc: 'Free classic + retro anime, fully licensed.', cat: 'Watch (legal)' },
   { name: 'Plex Free', url: 'https://www.plex.tv', desc: 'Free legal movies/shows alongside its famous media-server app.', cat: 'Watch (legal)' },
+  { name: 'buyelias.com', url: 'https://buyelias.com', desc: 'Indie storefront worth a look — small shops like this beat megastores for unique finds.', cat: 'Shops & Deals' },
+  { name: 'Etsy', url: 'https://www.etsy.com', desc: 'Handmade, vintage and custom goods from independent sellers.', cat: 'Shops & Deals' },
+  { name: 'Back Market', url: 'https://www.backmarket.com', desc: 'Refurbished phones, laptops and consoles with warranty. Cheaper + greener.', cat: 'Shops & Deals' },
   { name: 'GitHub', url: 'https://github.com', desc: 'Home of open source. Host code, ship Pages sites, find free tools.', cat: 'Dev' },
   { name: 'CodePen', url: 'https://codepen.io', desc: 'Try HTML/CSS/JS ideas live in the browser. Infinite tricks to learn from.', cat: 'Dev' },
   { name: 'Unsplash', url: 'https://unsplash.com', desc: 'Gorgeous free photos for wallpapers and projects.', cat: 'Create & Design' },
@@ -292,6 +302,7 @@ const CAT_DESC = {
   'Dev': 'Learn faster and sketch ideas for free.',
   'Media': 'Edit images and grab media without installs or watermarks.',
   'Watch (legal)': 'Free + licensed streaming only. No pirate sites here — they mean malware + takedowns.',
+  'Shops & Deals': 'Spend smarter: indie storefronts, handmade goods and refurbished tech.',
   'Create & Design': 'Make things: design, photos, video, AI voices — free tiers that actually deliver.',
   'Learn': 'Free courses, lectures and books — from MIT lectures to Duolingo streaks.',
   'OSINT (legal)': 'Open-source intelligence with public data only — research, verification, CTFs. Get consent / check local law before looking up real people.',
@@ -307,11 +318,11 @@ function SectionHead({ title, desc }) {
   )
 }
 
-/* Hand-picked essentials — shown in a ⭐ section on top of Cool Sites */
+/* Hand-picked essentials — shown in a Recommended section on top of Cool Sites */
 const RECOMMENDED = new Set([
   'uBlock Origin', 'Bitwarden', 'TinyWow', 'Photopea', 'Falstad Circuit Simulator',
   'Wokwi', 'Hugging Face', 'Cloudflare Pages', 'Wayback Machine', 'Radio Garden',
-  'urlscan.io', 'Have I Been Pwned',
+  'urlscan.io', 'Have I Been Pwned', 'buyelias.com', 'Modrinth', 'Cobalt',
 ])
 
 function copy(text) {
@@ -348,30 +359,30 @@ function Home({ go }) {
   return (
     <>
       <div className="hero card big">
-        <h1>🐉 Welcome to lootcave</h1>
+        <h1>Welcome to lootcave</h1>
         <p>Your localhost stash of useful internet throwaways: disposable emails with a <b>live inbox</b>, public SMS receivers, fake test identities, a hand-picked directory of free tools, and tiny dev utilities. Static only — no backend, no tracking, runs with <code>npm run dev</code>.</p>
         <div className="btnRow">
-          <button onClick={() => go('email')}>✉️ Get temp email</button>
-          <button className="ghost" onClick={() => go('numbers')}>📱 Find temp number</button>
-          <button className="ghost" onClick={() => go('ids')}>🪪 Generate ID</button>
-          <button className="ghost" onClick={() => go('settings')}>⚙️ Customize theme</button>
+          <button onClick={() => go('email')}><Mail size={15} className="btnIcon" /> Get temp email</button>
+          <button className="ghost" onClick={() => go('numbers')}><Smartphone size={15} className="btnIcon" /> Find temp number</button>
+          <button className="ghost" onClick={() => go('ids')}><IdCard size={15} className="btnIcon" /> Generate ID</button>
+          <button className="ghost" onClick={() => go('settings')}><SettingsIcon size={15} className="btnIcon" /> Customize theme</button>
         </div>
       </div>
       <SectionHead title="What lives here" desc="Ten sections, each with its own job. Hover nothing — just click and go." />
       <div className="cards">
-        <div className="card"><h3>✉️ Temp Email</h3><p>Real 1secmail inbox in-browser with automatic proxy fallback. Copy an address, receive mail, refresh live.</p><button className="ghost" onClick={() => go('email')}>Open →</button></div>
-        <div className="card"><h3>📱 Temp Numbers</h3><p>Free public SMS receivers for OTPs anyone can read, plus paid private rentals for sensitive codes. Safety notes included.</p><button className="ghost" onClick={() => go('numbers')}>Open →</button></div>
-        <div className="card"><h3>🪪 Fake IDs</h3><p>One-click test identities (name, login, address, company). 100% local — for dev/test signups, never legal docs.</p><button className="ghost" onClick={() => go('ids')}>Open →</button></div>
-        <div className="card"><h3>🌐 Cool Sites</h3><p>A curated + searchable directory: adblock, sims, Reddit gems, free hosting, free AI, utils, legal streaming. Add your own entries.</p><button className="ghost" onClick={() => go('sites')}>Open →</button></div>
-        <div className="card"><h3>🛠️ Mini Tools</h3><p>Offline-first utilities: charset-controlled password generator, UUIDs, QR codes, Base64 encoding.</p><button className="ghost" onClick={() => go('tools')}>Open →</button></div>
-        <div className="card"><h3>⚙️ Settings</h3><p>Ten themes, font sizes, compact mode, default tab, inbox refresh speed, password defaults. Auto-saved locally.</p><button className="ghost" onClick={() => go('settings')}>Open →</button></div>
-        <div className="card"><h3>🔒 Admin</h3><p>Password-gated behind-the-scenes: visit stats, API health checks, event log, storage + data controls.</p><button className="ghost" onClick={() => go('admin')}>Open →</button></div>
-        <div className="card"><h3>🎮 Mods</h3><p>Mod hubs for FiveM, Minecraft, GTA V, Bethesda, Sims + the managers that install them. Safety notes included.</p><button className="ghost" onClick={() => go('mods')}>Open →</button></div>
-        <div className="card"><h3>⬇️ Downloader</h3><p>YouTube MP3/MP4 via copy-paste yt-dlp commands + no-install tools like Cobalt.</p><button className="ghost" onClick={() => go('download')}>Open →</button></div>
-        <div className="card"><h3>💻 Software</h3><p>Essential free apps: Firefox, VLC, OBS, PowerToys, VS Code, Steam, Heroic and more.</p><button className="ghost" onClick={() => go('software')}>Open →</button></div>
+        <div className="card"><h3><Mail size={16} className="hicon" /> Temp Email</h3><p>Real 1secmail inbox in-browser with automatic proxy fallback. Copy an address, receive mail, refresh live.</p><button className="ghost" onClick={() => go('email')}>Open →</button></div>
+        <div className="card"><h3><Smartphone size={16} className="hicon" /> Temp Numbers</h3><p>Free public SMS receivers for OTPs anyone can read, plus paid private rentals for sensitive codes. Safety notes included.</p><button className="ghost" onClick={() => go('numbers')}>Open →</button></div>
+        <div className="card"><h3><IdCard size={16} className="hicon" /> Fake IDs</h3><p>One-click test identities (name, login, address, company). 100% local — for dev/test signups, never legal docs.</p><button className="ghost" onClick={() => go('ids')}>Open →</button></div>
+        <div className="card"><h3><Globe size={16} className="hicon" /> Cool Sites</h3><p>A curated + searchable directory: adblock, sims, Reddit gems, free hosting, free AI, utils, legal streaming. Add your own entries.</p><button className="ghost" onClick={() => go('sites')}>Open →</button></div>
+        <div className="card"><h3><Wrench size={16} className="hicon" /> Mini Tools</h3><p>Offline-first utilities: charset-controlled password generator, UUIDs, QR codes, Base64 encoding.</p><button className="ghost" onClick={() => go('tools')}>Open →</button></div>
+        <div className="card"><h3><SettingsIcon size={16} className="hicon" /> Settings</h3><p>Ten themes, font sizes, compact mode, default tab, inbox refresh speed, password defaults. Auto-saved locally.</p><button className="ghost" onClick={() => go('settings')}>Open →</button></div>
+        <div className="card"><h3><Lock size={16} className="hicon" /> Admin</h3><p>Password-gated behind-the-scenes: visit stats, API health checks, event log, storage + data controls.</p><button className="ghost" onClick={() => go('admin')}>Open →</button></div>
+        <div className="card"><h3><Gamepad2 size={16} className="hicon" /> Mods</h3><p>Mod hubs for FiveM, Minecraft, GTA V, Bethesda, Sims + the managers that install them. Safety notes included.</p><button className="ghost" onClick={() => go('mods')}>Open →</button></div>
+        <div className="card"><h3><Download size={16} className="hicon" /> Downloader</h3><p>YouTube MP3/MP4 via copy-paste yt-dlp commands + no-install tools like Cobalt.</p><button className="ghost" onClick={() => go('download')}>Open →</button></div>
+        <div className="card"><h3><Laptop size={16} className="hicon" /> Software</h3><p>Essential free apps: Firefox, VLC, OBS, PowerToys, VS Code, Steam, Heroic and more.</p><button className="ghost" onClick={() => go('software')}>Open →</button></div>
       </div>
       <div className="card">
-        <h3>House rules 🫡</h3>
+        <h3><ShieldCheck size={16} className="hicon" /> House rules</h3>
         <ul className="tips">
           <li><b>Public = public.</b> Free temp numbers and emails can be read by strangers — never banking, recovery, or sensitive accounts.</li>
           <li><b>Test IDs only.</b> Fake identities are for dev signups, never KYC or legal documents.</li>
@@ -450,7 +461,7 @@ function TempEmail({ refreshSec }) {
 
   return (
     <>
-      <SectionHead title="Live disposable inbox ⚡" desc={`Powered by the free 1secmail API with automatic fallback (direct → CORS proxies) when your browser blocks the call. Inbox auto-refreshes every ${refreshSec}s. Addresses expire after about a day.`} />
+      <SectionHead title="Live disposable inbox" desc={`Powered by the free 1secmail API with automatic fallback (direct → CORS proxies) when your browser blocks the call. Inbox auto-refreshes every ${refreshSec}s. Addresses expire after about a day.`} />
       <div className={`connPill ${error ? 'bad' : 'ok'}`}>
         <span className="dotPulse" /> connection: <b>{conn.route}</b>
         {conn.ms != null && <span> · {conn.ms}ms · {conn.at}</span>}
@@ -459,14 +470,14 @@ function TempEmail({ refreshSec }) {
         <div className="card big">
           <div className="addrRow">
             <code className="addr">{mailbox || 'generating…'}</code>
-            <button onClick={() => { copy(mailbox); setCopied(true); setTimeout(() => setCopied(false), 1200) }}>{copied ? 'Copied!' : 'Copy'}</button>
-            <button className="ghost" onClick={newAddress}>↻ New address</button>
-            <button className="ghost" onClick={refresh}>{loading ? '…' : '⟳ Refresh now'}</button>
+            <button onClick={() => { copy(mailbox); setCopied(true); setTimeout(() => setCopied(false), 1200) }}><Copy size={14} className="btnIcon" /> {copied ? 'Copied!' : 'Copy'}</button>
+            <button className="ghost" onClick={newAddress}><RotateCcw size={14} className="btnIcon" /> New address</button>
+            <button className="ghost" onClick={refresh}>{loading ? '…' : <><RefreshCw size={14} className="btnIcon" /> Refresh now</>}</button>
           </div>
           {error && (
             <div className="errBox">
               <p className="err">{error}</p>
-              <p className="muted">Likely causes: you're offline, a VPN/firewall blocks it, or your adblocker (uBlock/AdGuard) blocks temp-mail domains — pause it for localhost and hit ↻. Details of every attempt are in the 🔒 Admin event log.</p>
+              <p className="muted">Likely causes: you're offline, a VPN/firewall blocks it, or your adblocker (uBlock/AdGuard) blocks temp-mail domains — pause it for localhost and hit New address. Details of every attempt are in the Admin event log.</p>
             </div>
           )}
           <div className="inbox">
@@ -508,12 +519,12 @@ function TempNumbers({ query }) {
   const list = SMS_SITES.filter((s) => (s.name + s.desc + s.tags).toLowerCase().includes(q))
   return (
     <>
-      <SectionHead title="Temporary numbers 📱" desc="Free sites give you PUBLIC numbers — anyone can open the same inbox. Great for spammy signups, terrible for banking. Pay a few cents for a private rental when it matters." />
-      <div className="notice">⚠️ Free = <b>public</b>. Never use these for banking, password recovery, or 2FA you care about. For private OTPs use a paid rental below.</div>
+      <SectionHead title="Temporary numbers" desc="Free sites give you PUBLIC numbers — anyone can open the same inbox. Great for spammy signups, terrible for banking. Pay a few cents for a private rental when it matters." />
+      <div className="notice"><TriangleAlert size={15} className="hicon" /> Free = <b>public</b>. Never use these for banking, password recovery, or 2FA you care about. For private OTPs use a paid rental below.</div>
       <div className="cards">
         {list.map((s) => (
           <a key={s.name} className="card link" href={s.url} target="_blank" rel="noreferrer">
-            <h3>{s.name} ↗</h3>
+            <h3>{s.name} <ExternalLink size={13} className="hicon" /></h3>
             <p>{s.desc}</p>
             <code>{s.url.replace('https://', '')}</code>
           </a>
@@ -529,7 +540,7 @@ function FakeIDs() {
   const [id, setId] = useState(() => makeIdentity())
   return (
     <>
-      <SectionHead title="Fake identity generator 🪪" desc="One click builds a full test persona — name, login, email, password, phone, birthday, address, company. Everything is random and local to your browser." />
+      <SectionHead title="Fake identity generator" desc="One click builds a full test persona — name, login, email, password, phone, birthday, address, company. Everything is random and local to your browser." />
       <div className="grid2">
         <div className="card big">
           <div className="kv">
@@ -542,8 +553,8 @@ function FakeIDs() {
             ))}
           </div>
           <div className="btnRow">
-            <button onClick={() => setId(makeIdentity())}>🎲 Generate new</button>
-            <button className="ghost" onClick={() => copy(Object.values(id).join('\n'))}>Copy all</button>
+          <button onClick={() => setId(makeIdentity())}><Dices size={15} className="btnIcon" /> Generate new</button>
+          <button className="ghost" onClick={() => copy(Object.values(id).join('\n'))}><Copy size={15} className="btnIcon" /> Copy all</button>
           </div>
         </div>
         <div className="card">
@@ -580,7 +591,7 @@ function AddSiteForm({ onAdd, cats }) {
   }
   return (
     <div className="card">
-      <h3>➕ Add your own site</h3>
+      <h3><Plus size={16} className="hicon" /> Add your own site</h3>
       <p className="muted">Save anything here — your favorite adblock list, subreddit, host, AI tool. Stored in localStorage, survives reloads.</p>
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name (e.g. Utopia P2P)" />
       <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="URL (e.g. example.com)" />
@@ -607,7 +618,7 @@ function CoolSites({ query, customSites, onAdd, onDelete }) {
   const siteCard = (s) => (
     <div key={s.name + s.url} className="card linkWrap">
       <a className="linkMain" href={s.url} target="_blank" rel="noreferrer">
-        <h3>{s.name} {s.custom ? '✏️' : '↗'} {RECOMMENDED.has(s.name) && <span className="recBadge">⭐</span>}</h3>
+                <h3>{s.name} {s.custom ? <Pencil size={13} className="hicon" /> : <ExternalLink size={13} className="hicon" />} {RECOMMENDED.has(s.name) && <span className="recBadge"><Star size={11} /> Recommended</span>}</h3>
         <p>{s.desc}</p>
       </a>
       {s.custom && <button className="ghost sm" onClick={() => onDelete(s.url)}>remove</button>}
@@ -615,11 +626,11 @@ function CoolSites({ query, customSites, onAdd, onDelete }) {
   )
   return (
     <>
-      <SectionHead title="Cool sites directory 🌐" desc={`${all.length} entries and counting. Every entry has a description so you know WHY it's here. Search filters everything. Add your own at the bottom — custom entries are marked ✏️ and can be deleted.`} />
-      <div className="notice">📺 <b>Watch (legal)</b> = free & licensed streaming only. Pirate anime/streaming sites aren't listed — they're illegal and usually bundled with malware. Crunchyroll / Tubi / Pluto / RetroCrush cover most needs for $0.</div>
+      <SectionHead title="Cool sites directory" desc={`${all.length} entries and counting. Every entry has a description so you know WHY it's here. Search filters everything. Add your own at the bottom — custom entries are marked with a pencil and can be deleted.`} />
+      <div className="notice"><Tv size={15} className="hicon" /> <b>Watch (legal)</b> = free & licensed streaming only. Pirate anime/streaming sites aren't listed — they're illegal and usually bundled with malware. Crunchyroll / Tubi / Pluto / RetroCrush cover most needs for $0.</div>
       {recs.length > 0 && (
         <div>
-          <h3 className="cat">⭐ Recommended — start with these</h3>
+          <h3 className="cat"><Star size={15} className="hicon" /> Recommended — start with these</h3>
           <p className="catDesc">The essentials I'd install or bookmark first on a fresh machine.</p>
           <div className="cards">
             {recs.map(siteCard)}
@@ -684,7 +695,7 @@ function PasswordCard({ settings, update }) {
   ]
   return (
     <div className="card big">
-      <h3>🔑 Password generator</h3>
+      <h3><KeyRound size={16} className="hicon" /> Password generator</h3>
       <p className="muted">Cryptographically random (WebCrypto), generated on your device. Toggle the character sets to match a site's rules — bigger pool + longer length = exponentially harder to crack.</p>
       <code className="pw">{pw}</code>
       <div className="meter"><div className={`fill ${st.cls}`} style={{ width: `${st.pct}%` }} /></div>
@@ -723,7 +734,7 @@ function JsonTool() {
   useEffect(() => { run(false) }, [])
   return (
     <div className="card">
-      <h3>🧾 JSON formatter</h3>
+      <h3><FileJson size={16} className="hicon" /> JSON formatter</h3>
       <p className="muted">Paste messy JSON — pretty-print it, minify it, or find the syntax error.</p>
       <textarea rows="3" value={src} onChange={(e) => setSrc(e.target.value)} placeholder='{"paste": "json here"}' />
       <div className="btnRow">
@@ -753,7 +764,7 @@ function CaseTool() {
   const [picked, setPicked] = useState('camel')
   return (
     <div className="card">
-      <h3>🔤 Case converter + stats</h3>
+      <h3><CaseSensitive size={16} className="hicon" /> Case converter + stats</h3>
       <p className="muted">Variable names, slugs, titles — one click. Live word/char count included.</p>
       <textarea rows="2" value={txt} onChange={(e) => setTxt(e.target.value)} placeholder="type something…" />
       <div className="btnRow">
@@ -789,7 +800,7 @@ function TimeTool() {
   }
   return (
     <div className="card">
-      <h3>⏱️ Timestamp converter</h3>
+      <h3><Clock size={16} className="hicon" /> Timestamp converter</h3>
       <p className="muted">Unix time ↔ human date. Accepts seconds, ms, or ISO strings.</p>
       <p className="muted">now: <code>{Math.floor(now / 1000)}</code> <button className="ghost sm" onClick={() => { setVal(String(Math.floor(Date.now() / 1000))); copy(String(Math.floor(Date.now() / 1000))) }}>copy</button></p>
       <input value={val} onChange={(e) => setVal(e.target.value)} placeholder="1726400000 or 2026-09-15T12:00:00Z" />
@@ -824,7 +835,7 @@ function ColorTool() {
   const [h, s, l] = valid ? rgbToHsl(r, g, b) : [0, 0, 0]
   return (
     <div className="card">
-      <h3>🎨 Color picker</h3>
+      <h3><Palette size={16} className="hicon" /> Color picker</h3>
       <p className="muted">Pick a color, get HEX / RGB / HSL for your CSS. Click a swatch to load it.</p>
       <div className="colorRow">
         <input type="color" value={valid ? hex : '#000000'} onChange={(e) => setHex(e.target.value)} />
@@ -863,7 +874,7 @@ function LoremTool() {
   useEffect(() => { gen(n) }, [gen])
   return (
     <div className="card">
-      <h3>📝 Lorem ipsum</h3>
+      <h3><TextQuote size={16} className="hicon" /> Lorem ipsum</h3>
       <p className="muted">Placeholder text for mockups. <b>{n}</b> paragraph(s).</p>
       <input type="range" min="1" max="8" value={n} onChange={(e) => { setN(+e.target.value); gen(+e.target.value) }} />
       <pre className="dump lorem">{out}</pre>
@@ -884,7 +895,7 @@ function UrlTool() {
   }, [txt, mode])
   return (
     <div className="card">
-      <h3>🔗 URL encoder</h3>
+      <h3><Link2 size={16} className="hicon" /> URL encoder</h3>
       <p className="muted">Fix query strings with spaces + special chars, or decode %20 soup.</p>
       <input value={txt} onChange={(e) => setTxt(e.target.value)} placeholder="paste url or text…" />
       <div className="btnRow">
@@ -910,7 +921,7 @@ function DiceTool() {
   useEffect(() => { roll() }, [])
   return (
     <div className="card">
-      <h3>🎲 Dice roller</h3>
+      <h3><Dices size={16} className="hicon" /> Dice roller</h3>
       <p className="muted">Crypto-random rolls for D&D nights and decisions.</p>
       <div className="btnRow">
         {[4, 6, 8, 10, 12, 20, 100].map((d) => (
@@ -940,7 +951,7 @@ function HashTool() {
   }, [txt, algo])
   return (
     <div className="card">
-      <h3>🔐 Hash generator</h3>
+      <h3><Hash size={16} className="hicon" /> Hash generator</h3>
       <p className="muted">Fingerprint any text: verify downloads, compare files, store checksums.</p>
       <textarea rows="2" value={txt} onChange={(e) => setTxt(e.target.value)} placeholder="text to hash…" />
       <div className="btnRow">
@@ -978,7 +989,7 @@ function UnitTool() {
   }
   return (
     <div className="card">
-      <h3>📏 Unit converter</h3>
+      <h3><Ruler size={16} className="hicon" /> Unit converter</h3>
       <p className="muted">Length, weight, temperature. No more googling "cm to inches".</p>
       <div className="btnRow">
         {['Length', 'Weight', 'Temp'].map((c) => (
@@ -1028,7 +1039,7 @@ function TimerTool() {
   const ss = String(left % 60).padStart(2, '0')
   return (
     <div className="card">
-      <h3>⏲️ Focus timer</h3>
+      <h3><Timer size={16} className="hicon" /> Focus timer</h3>
       <p className="muted">Pomodoro-style countdown with a beep at zero. 25/5 is the classic.</p>
       <code className="pw big">{mm}:{ss}</code>
       <div className="btnRow">
@@ -1058,7 +1069,7 @@ function ChoiceTool() {
   useEffect(() => { decide() }, [])
   return (
     <div className="card">
-      <h3>🎯 Decision maker</h3>
+      <h3><Target size={16} className="hicon" /> Decision maker</h3>
       <p className="muted">Can't choose? List options, let fate decide. Crypto-random, no mercy.</p>
       <textarea rows="3" value={opts} onChange={(e) => setOpts(e.target.value)} placeholder="one option per line…" />
       <code className="pw">{pick || '…'}</code>
@@ -1076,7 +1087,7 @@ function PwCheckTool() {
   const st = pwStrength(txt, pool || 2)
   return (
     <div className="card">
-      <h3>🕵️ Password strength check</h3>
+      <h3><ScanSearch size={16} className="hicon" /> Password strength check</h3>
       <p className="muted">Paste an existing password to grade it. Checked locally — it never leaves this page.</p>
       <input type="password" value={txt} onChange={(e) => setTxt(e.target.value)} placeholder="test a password…" autoComplete="off" />
       {txt ? (
@@ -1102,11 +1113,11 @@ function Tools({ settings, update }) {
   }, [b64in, b64mode])
   return (
     <>
-      <SectionHead title="Mini tools 🛠️" desc="Small utilities that run entirely in your browser. Passwords use crypto-random generation; QR codes render via a free image API; everything else never touches the network." />
+      <SectionHead title="Mini tools" desc="Small utilities that run entirely in your browser. Passwords use crypto-random generation; QR codes render via a free image API; everything else never touches the network." />
       <PasswordCard settings={settings} update={update} />
       <div className="cards">
           <div className="card">
-            <h3>🆔 UUID v4</h3>
+            <h3><Fingerprint size={16} className="hicon" /> UUID v4</h3>
             <p className="muted">Random unique IDs for database rows, test fixtures, filenames.</p>
             <code className="pw small">{uuid}</code>
             <div className="btnRow">
@@ -1115,13 +1126,13 @@ function Tools({ settings, update }) {
             </div>
           </div>
           <div className="card">
-            <h3>🔳 QR code</h3>
+            <h3><QrCode size={16} className="hicon" /> QR code</h3>
             <p className="muted">Type any link or text — great for sharing localhost URLs to your phone.</p>
             <input value={qr} onChange={(e) => setQr(e.target.value)} placeholder="text or url" />
             {qr && <img className="qr" src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(qr)}`} alt="qr" />}
           </div>
           <div className="card">
-            <h3>📦 Base64 {b64mode}</h3>
+            <h3><Binary size={16} className="hicon" /> Base64 {b64mode}</h3>
             <p className="muted">Encode tokens and payloads — or paste Base64 back to decode it.</p>
             <input value={b64in} onChange={(e) => setB64in(e.target.value)} />
             <div className="btnRow">
@@ -1235,8 +1246,8 @@ function Mods({ query }) {
   })).filter((g) => g.sites.length > 0)
   return (
     <>
-      <SectionHead title="Mod hubs 🎮" desc="Where to get mods for FiveM, Minecraft, GTA V and basically every moddable game — the communities everyone actually uses, not shady re-upload aggregators." />
-      <div className="notice">🛡️ <b>Mod safety:</b> download from the hubs below, never random Discord links. Scan archives (VirusTotal tab ↑), avoid any "mod" that is a <b>.exe</b>, back up saves first — and keep story-mode mods out of <b>GTA Online</b> unless you enjoy bans.</div>
+      <SectionHead title="Mod hubs" desc="Where to get mods for FiveM, Minecraft, GTA V and basically every moddable game — the communities everyone actually uses, not shady re-upload aggregators." />
+      <div className="notice"><ShieldCheck size={15} className="hicon" /> <b>Mod safety:</b> download from the hubs below, never random Discord links. Scan archives (VirusTotal tab ↑), avoid any "mod" that is a <b>.exe</b>, back up saves first — and keep story-mode mods out of <b>GTA Online</b> unless you enjoy bans.</div>
       {games.map((g) => (
         <div key={g.game}>
           <h3 className="cat">{g.game}</h3>
@@ -1244,7 +1255,7 @@ function Mods({ query }) {
           <div className="cards">
             {g.sites.map((s) => (
               <a key={s.name} className="card link" href={s.url} target="_blank" rel="noreferrer">
-                <h3>{s.name} ↗</h3>
+                <h3>{s.name} <ExternalLink size={13} className="hicon" /></h3>
                 <p>{s.desc}</p>
               </a>
             ))}
@@ -1283,24 +1294,24 @@ function Downloader() {
   const doCopy = () => { copy(cmds[fmt]); setCopied(true); setTimeout(() => setCopied(false), 1200) }
   return (
     <>
-      <SectionHead title="Video & audio downloader ⬇️" desc="A static site can't rip YouTube by itself — that needs real software. So this page gives you the next best thing: a command generator for yt-dlp (the best tool) plus no-install alternatives." />
-      <div className="notice">⚖️ <b>Keep it legal:</b> download your own uploads, Creative Commons, or royalty-free stuff. Ripping copyrighted music/videos breaks YouTube's ToS (and often the law).</div>
+      <SectionHead title="Video and audio downloader" desc="A static site can't rip YouTube by itself — that needs real software. So this page gives you the next best thing: a command generator for yt-dlp (the best tool) plus no-install alternatives." />
+      <div className="notice"><Scale size={15} className="hicon" /> <b>Keep it legal:</b> download your own uploads, Creative Commons, or royalty-free stuff. Ripping copyrighted music/videos breaks YouTube's ToS (and often the law).</div>
       <div className="grid2">
         <div className="card big">
-          <h3>1️⃣ Paste a link, pick a format</h3>
+          <h3><span className="step">1</span> Paste a link, pick a format</h3>
           <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://youtube.com/watch?v=…" />
           <div className="btnRow">
             {['mp3', 'mp4', 'best'].map((f) => (
-              <button key={f} className={fmt === f ? '' : 'ghost sm'} onClick={() => setFmt(f)}>{f === 'mp3' ? '🎵 MP3' : f === 'mp4' ? '🎬 MP4 1080p' : '📦 Playlist MP4'}</button>
+              <button key={f} className={fmt === f ? '' : 'ghost sm'} onClick={() => setFmt(f)}>{f === 'mp3' ? <><Music size={14} className="btnIcon" /> MP3</> : f === 'mp4' ? 'MP4 1080p' : 'Playlist MP4'}</button>
             ))}
           </div>
           <p className="muted">{fmtDesc[fmt]}</p>
-          <h3>2️⃣ Run this in a terminal</h3>
+          <h3><span className="step">2</span> Run this in a terminal</h3>
           <code className="pw small">{cmds[fmt]}</code>
           <div className="btnRow">
             <button onClick={doCopy}>{copied ? 'Copied!' : 'Copy command'}</button>
           </div>
-          <h3>3️⃣ First-time setup (Windows, one time)</h3>
+          <h3><span className="step">3</span> First-time setup (Windows, one time)</h3>
           <code className="pw small">winget install -e --id yt-dlp.yt-dlp</code>
           <code className="pw small">winget install -e --id Gyan.FFmpeg</code>
           <p className="muted">Install both, restart the terminal, then the commands above just work. Mac: <code>brew install yt-dlp ffmpeg</code>.</p>
@@ -1390,7 +1401,7 @@ function Software({ query }) {
   })).filter((g) => g.apps.length > 0)
   return (
     <>
-      <SectionHead title="Essential software 💻" desc="The free apps nearly everyone ends up installing: browsers, players, utilities, dev tools, launchers. All free tiers or fully free — no trials masquerading as freeware." />
+      <SectionHead title="Essential software" desc="The free apps nearly everyone ends up installing: browsers, players, utilities, dev tools, launchers. All free tiers or fully free — no trials masquerading as freeware." />
       {groups.map((g) => (
         <div key={g.group}>
           <h3 className="cat">{g.group}</h3>
@@ -1398,7 +1409,7 @@ function Software({ query }) {
           <div className="cards">
             {g.apps.map((a) => (
               <a key={a.name} className="card link" href={a.url} target="_blank" rel="noreferrer">
-                <h3>{a.name} ↗</h3>
+                <h3>{a.name} <ExternalLink size={13} className="hicon" /></h3>
                 <p>{a.desc}</p>
               </a>
             ))}
@@ -1414,16 +1425,19 @@ function Software({ query }) {
 function Settings({ settings, update, reset }) {
   return (
     <>
-      <SectionHead title="Settings ⚙️" desc="Everything here saves automatically to localStorage — no account, no server. Themes apply instantly across the whole site." />
+      <SectionHead title="Settings" desc="Everything here saves automatically to localStorage — no account, no server. Themes apply instantly across the whole site." />
       <div className="grid2">
         <div className="card big">
           <h3 className="cat">Theme — pick your vibe</h3>
           <div className="themeGrid">
-            {THEMES.map((t) => (
-              <button key={t.id} className={settings.theme === t.id ? 'theme active' : 'theme'} onClick={() => update({ theme: t.id })}>
-                <b>{t.name}</b><span>{t.desc}</span>
-              </button>
-            ))}
+            {THEMES.map((t) => {
+              const Icon = t.icon
+              return (
+                <button key={t.id} className={settings.theme === t.id ? 'theme active' : 'theme'} onClick={() => update({ theme: t.id })}>
+                  <b><Icon size={15} className="hicon" />{t.name}</b><span>{t.desc}</span>
+                </button>
+              )
+            })}
           </div>
           <h3 className="cat">Appearance</h3>
           <label className="setRow">Font size — scales all text site-wide.
@@ -1602,7 +1616,7 @@ function Admin({ customSites, onDeleteSite, onWipe }) {
   if (!authed) {
     return (
       <>
-        <SectionHead title="Admin area 🔒" desc="Everything behind this lock is local: stats, API health, the event log, and data controls. No server, no tracking — it just reads your own browser storage." />
+        <SectionHead title="Admin area" desc="Everything behind this lock is local: stats, API health, the event log, and data controls. No server, no tracking — it just reads your own browser storage." />
         <div className="card lockWrap">
           <h2>{isSetup ? 'Create your admin login' : 'Admin login'}</h2>
           <p className="muted">{isSetup ? 'First visit — choose the username + password that will guard this page. Only a hash is stored, on this device only.' : 'Username + password required. Small-league security: it stops casual snoopers, not someone reading your files.'}</p>
@@ -1624,19 +1638,19 @@ function Admin({ customSites, onDeleteSite, onWipe }) {
 
   return (
     <>
-      <SectionHead title="Admin dashboard 🔓" desc="Live view of this site's local state. Everything here lives in your browser — nothing is sent anywhere." />
+      <SectionHead title="Admin dashboard" desc="Live view of this site's local state. Everything here lives in your browser — nothing is sent anywhere." />
       <div className="btnRow">
-        <button className="ghost" onClick={() => setEvents(getEvents())}>⟳ Refresh log</button>
+        <button className="ghost" onClick={() => setEvents(getEvents())}><RefreshCw size={14} className="btnIcon" /> Refresh log</button>
         <button className="ghost" onClick={logout}>Lock page</button>
       </div>
       <div className="cards">
-        <div className="card"><h3>📊 visits</h3><p className="bigNum">{visits}</p><p className="muted">page loads · first seen {firstSeen}</p></div>
-        <div className="card"><h3>💾 storage</h3><p className="bigNum">{(storageBytes() / 1024).toFixed(1)} KB</p><p className="muted">localStorage used · {customSites.length} custom sites · {events.length} logged events</p></div>
-        <div className="card"><h3>🎨 theme</h3><p className="bigNum">{settings.theme}</p><p className="muted">font {settings.fontScale} · default tab {settings.defaultTab} · refresh {settings.refreshSec}s</p></div>
+        <div className="card"><h3><MousePointerClick size={16} className="hicon" /> visits</h3><p className="bigNum">{visits}</p><p className="muted">page loads · first seen {firstSeen}</p></div>
+        <div className="card"><h3><HardDrive size={16} className="hicon" /> storage</h3><p className="bigNum">{(storageBytes() / 1024).toFixed(1)} KB</p><p className="muted">localStorage used · {customSites.length} custom sites · {events.length} logged events</p></div>
+        <div className="card"><h3><Palette size={16} className="hicon" /> theme</h3><p className="bigNum">{settings.theme}</p><p className="muted">font {settings.fontScale} · default tab {settings.defaultTab} · refresh {settings.refreshSec}s</p></div>
       </div>
       <div className="grid2">
         <div className="card big">
-          <h3>📡 API health {checking ? '(checking…)' : ''}</h3>
+          <h3><Wifi size={16} className="hicon" /> API health {checking ? '(checking…)' : ''}</h3>
           <p className="muted">Runs real requests from your browser and reports what happens — including expected CORS blocks.</p>
           <div className="btnRow"><button onClick={runHealth} disabled={checking}>{checking ? 'Running…' : 'Run health check'}</button></div>
           {Object.entries(health).map(([k, v]) => (
@@ -1648,7 +1662,7 @@ function Admin({ customSites, onDeleteSite, onWipe }) {
           {Object.keys(health).length === 0 && <p className="muted">Not run yet.</p>}
         </div>
         <div className="card">
-          <h3>📋 Event log</h3>
+          <h3><ClipboardList size={16} className="hicon" /> Event log</h3>
           <p className="muted">Last {events.length} events (network attempts, logins, site adds). Newest first.</p>
           <div className="logBox">
             {events.length === 0 && <p className="muted">Empty — generate an inbox or add a site.</p>}
@@ -1661,7 +1675,7 @@ function Admin({ customSites, onDeleteSite, onWipe }) {
       </div>
       <div className="grid2">
         <div className="card">
-          <h3>🌐 Your custom sites ({customSites.length})</h3>
+          <h3><Globe size={16} className="hicon" /> Your custom sites ({customSites.length})</h3>
           {customSites.length === 0 && <p className="muted">None yet — add some from Cool Sites.</p>}
           {customSites.map((s) => (
             <div key={s.url} className="row">
@@ -1672,9 +1686,9 @@ function Admin({ customSites, onDeleteSite, onWipe }) {
           ))}
         </div>
         <div className="card">
-          <h3>⚙️ Raw settings</h3>
+          <h3><SettingsIcon size={16} className="hicon" /> Raw settings</h3>
           <pre className="dump">{JSON.stringify(settings, null, 2)}</pre>
-          <h3>🔑 Change admin login</h3>
+          <h3><KeyRound size={16} className="hicon" /> Change admin login</h3>
           <p className="muted">Signed in as <b>{localStorage.getItem('lootbox-admin-user')}</b>. Changing either field logs you out to the new credentials.</p>
           <div className="lockCol">
             <input value={newUsername} onChange={(e) => setNewUsername(e.target.value)} placeholder="new username" autoComplete="username" />
@@ -1682,7 +1696,7 @@ function Admin({ customSites, onDeleteSite, onWipe }) {
             <button onClick={changeCreds}>Update login</button>
           </div>
           {msg && <p className="muted">{msg}</p>}
-          <h3>☢️ Danger zone</h3>
+          <h3><TriangleAlert size={16} className="hicon" /> Danger zone</h3>
           <div className="btnRow">
             <button className="ghost" onClick={() => onWipe('sites')}>Delete custom sites</button>
             <button className="ghost" onClick={() => onWipe('events')}>Clear event log</button>
@@ -1744,7 +1758,7 @@ export default function App() {
     <div className="app">
       <header className="top">
         <div className="logoRow">
-          <div className="logo">🐉 loot<span>cave</span></div>
+          <div className="logo"><Gem size={30} className="logoIcon" /> loot<span>cave</span></div>
           <div className="themeQuick">
             {THEMES.map((t) => (
               <button
@@ -1767,11 +1781,14 @@ export default function App() {
           />
         </div>
         <nav className="tabs">
-          {TABS.map((t) => (
-            <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)} title={TAB_BLURBS[t.id]}>
-              {t.icon} {t.label}
-            </button>
-          ))}
+          {TABS.map((t) => {
+            const Icon = t.icon
+            return (
+              <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)} title={TAB_BLURBS[t.id]}>
+                <Icon size={15} className="tabIcon" /> {t.label}
+              </button>
+            )
+          })}
         </nav>
         {!settings.hideBlurbs && <p className="tabBlurb">{TAB_BLURBS[tab]}</p>}
       </header>
@@ -1788,7 +1805,7 @@ export default function App() {
         {tab === 'settings' && <Settings settings={settings} update={update} reset={() => setSettings(DEFAULT_SETTINGS)} />}
         {tab === 'admin' && <Admin customSites={customSites} onDeleteSite={delSite} onWipe={wipe} />}
       </main>
-      <footer>runs on <code>npm run dev</code> · static only, no backend · stay safe out there 🫡</footer>
+      <footer>runs on <code>npm run dev</code> · static only, no backend · stay safe out there</footer>
     </div>
   )
 }
