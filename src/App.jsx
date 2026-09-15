@@ -5,7 +5,7 @@ import {
   Fingerprint, FileJson, Gem, Globe, HardDrive, Hash, Home as HomeIcon, IdCard, Images, KeyRound,
   Laugh, Link2, Mail, MailOpen, Menu, MessageCircle, MousePointerClick, Music, Palette, Pencil, Plus, QrCode,
   RefreshCw, RotateCcw, Ruler, Scale, ScanSearch, Send, Settings as SettingsIcon, ShieldCheck, Smartphone,
-  Star, Target, TextQuote, Timer, TriangleAlert, Tv, UserCheck, Wifi, Wrench, ChevronDown, Info,
+  Star, Target, Terminal, TextQuote, Timer, TriangleAlert, Tv, UserCheck, Wifi, Wrench, ChevronDown, Info,
 } from 'lucide-react'
 import './App.css'
 
@@ -1647,7 +1647,7 @@ function Tools({ settings, update }) {
 }
 
 /* ---------- Mods hub ---------- */
-import { MOD_GAMES, DL_TOOLS, SOFTWARE, PRANKS, TEMP_FILES, EVENTS } from './data/hubs.js'
+import { MOD_GAMES, DL_TOOLS, SOFTWARE, PRANKS, TEMP_FILES, EVENTS, FIVEM_CONVERTERS, FIVEM_COMMANDS } from './data/hubs.js'
 
 function Mods({ query }) {
   const q = query.toLowerCase()
@@ -2797,6 +2797,326 @@ function AiHelper() {
   )
 }
 
+/* ---------- FiveM Server Maker: cfg + fxmanifest generators ---------- */
+function downloadText(name, text) {
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }))
+  a.download = name
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000)
+}
+
+function CfgGen() {
+  const [host, setHost] = useState('My FiveM Server')
+  const [desc, setDesc] = useState('')
+  const [key, setKey] = useState('')
+  const [slots, setSlots] = useState('48')
+  const [onesync, setOnesync] = useState(true)
+  const [build, setBuild] = useState('3095')
+  const [gamePort, setGamePort] = useState('30120')
+  const [txPort, setTxPort] = useState('40120')
+  const [tags, setTags] = useState('default, roleplay')
+  const [resources, setResources] = useState('qb-core\nmy-first-mlo')
+  const [adminId, setAdminId] = useState('')
+  const [copied, setCopied] = useState(false)
+  const cfg = useMemo(() => {
+    const L = []
+    L.push('# Generated with LootCave Server Maker - paste your key and review before first boot')
+    L.push(`sv_hostname "${(host.trim() || 'My FiveM Server').replace(/"/g, '')}"`)
+    if (desc.trim()) L.push(`sets Project_description "${desc.trim().replace(/"/g, '')}"`)
+    if (tags.trim()) L.push(`sets tags "${tags.trim().replace(/"/g, '')}"`)
+    L.push(`sv_maxclients ${Math.min(2048, Math.max(1, parseInt(slots, 10) || 48))}`)
+    L.push(`sv_licenseKey "${key.trim() || 'PASTE_KEY_FROM_KEYMASTER'}"`)
+    L.push(`endpoint_add_tcp "0.0.0.0:${gamePort.trim() || '30120'}"`)
+    L.push(`endpoint_add_udp "0.0.0.0:${gamePort.trim() || '30120'}"`)
+    L.push(`set onesync ${onesync ? 'on' : 'off'}`)
+    if (build.trim()) L.push(`sv_enforceGameBuild ${build.trim()}`)
+    L.push(`set txAdminPort "${txPort.trim() || '40120'}"`)
+    L.push('ensure chat', 'ensure spawnmanager', 'ensure sessionmanager', 'ensure basic-gamemode', 'ensure hardcap')
+    resources.split('\n').map((s) => s.trim()).filter(Boolean).forEach((r) => L.push(`ensure ${r}`))
+    if (adminId.trim()) {
+      L.push('add_ace group.admin command allow')
+      L.push(`add_principal identifier.fivem:${adminId.trim()} group.admin`)
+    }
+    return L.join('\n')
+  }, [host, desc, key, slots, onesync, build, gamePort, txPort, tags, resources, adminId])
+  const doCopy = () => { copy(cfg); setCopied(true); setTimeout(() => setCopied(false), 1500) }
+  return (
+    <div className="card big">
+      <h3>server.cfg generator</h3>
+      <p className="muted">Fill the fields, get a boot-ready config. The key comes free from the Cfx Portal (keymaster).</p>
+      <label className="setRow">Server name<input value={host} onChange={(e) => setHost(e.target.value)} placeholder="My FiveM Server" /></label>
+      <label className="setRow">License key<input value={key} onChange={(e) => setKey(e.target.value)} placeholder="paste keymaster key" /></label>
+      <label className="setRow">Slots (48 default, more needs Element Club)<input type="number" min="1" max="2048" value={slots} onChange={(e) => setSlots(e.target.value)} /></label>
+      <label className="setRow">OneSync (needed for 33+ players)<input type="checkbox" checked={onesync} onChange={(e) => setOnesync(e.target.checked)} /></label>
+      <label className="setRow">Game build<input value={build} onChange={(e) => setBuild(e.target.value)} placeholder="3095" /></label>
+      <label className="setRow">Game port<input value={gamePort} onChange={(e) => setGamePort(e.target.value)} placeholder="30120" /></label>
+      <label className="setRow">txAdmin port (keep private)<input value={txPort} onChange={(e) => setTxPort(e.target.value)} placeholder="40120" /></label>
+      <label className="setRow">Tags<input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="default, roleplay" /></label>
+      <label className="setRow">Admin FiveM ID (optional)<input value={adminId} onChange={(e) => setAdminId(e.target.value)} placeholder="e.g. 123456" /></label>
+      <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Server description (optional)" />
+      <textarea rows="3" value={resources} onChange={(e) => setResources(e.target.value)} placeholder={'Your resources, one per line'} />
+      <pre className="dump">{cfg}</pre>
+      <div className="btnRow">
+        <button onClick={doCopy}>{copied ? 'Copied!' : 'Copy server.cfg'}</button>
+        <button className="ghost" onClick={() => downloadText('server.cfg', cfg)}>Download .cfg</button>
+      </div>
+    </div>
+  )
+}
+
+function FxGen() {
+  const [res, setRes] = useState('my-cool-car')
+  const [author, setAuthor] = useState('you')
+  const [version, setVersion] = useState('1.0.0')
+  const [fdesc, setFdesc] = useState('My first streamed vehicle.')
+  const [client, setClient] = useState('client/main.lua')
+  const [server, setServer] = useState('')
+  const [shared, setShared] = useState('shared/config.lua')
+  const [files, setFiles] = useState('stream/*.ydr, stream/*.ytd')
+  const [deps, setDeps] = useState('')
+  const [ui, setUi] = useState('')
+  const [lua54, setLua54] = useState(true)
+  const [copied, setCopied] = useState(false)
+  const csv = (s) => s.split(',').map((x) => x.trim()).filter(Boolean)
+  const block = (name, arr) => (arr.length ? `${name} {\n${arr.map((f) => `  '${f}'`).join(',\n')}\n}\n` : '')
+  const fx = useMemo(() => {
+    const L = [
+      `-- fxmanifest.lua for ${res.trim() || 'resource'} (LootCave-generated)`,
+      `fx_version 'cerulean'`,
+      `game 'gta5'`,
+      `author '${author.trim() || 'you'}'`,
+      `description '${fdesc.trim()}'`,
+      `version '${version.trim() || '1.0.0'}'`,
+      '',
+    ]
+    if (lua54) L.push(`lua54 'yes'`, '')
+    L.push(block('client_scripts', csv(client)))
+    L.push(block('server_scripts', csv(server)))
+    L.push(block('shared_scripts', csv(shared)))
+    L.push(block('files', csv(files)))
+    L.push(block('dependencies', csv(deps)))
+    if (ui.trim()) L.push(`ui_page '${ui.trim()}'`, '')
+    return L.join('\n').trim() + '\n'
+  }, [res, author, version, fdesc, client, server, shared, files, deps, ui, lua54])
+  const tree = useMemo(() => {
+    const dirs = [...new Set([...csv(client), ...csv(server), ...csv(shared)].map((f) => f.split('/')[0]).filter((d) => d && !d.includes('.')))]
+    return `${res.trim() || 'resource'}/\n  fxmanifest.lua\n${dirs.map((d) => `  ${d}/...`).join('\n')}`
+  }, [res, client, server, shared])
+  const doCopy = () => { copy(fx); setCopied(true); setTimeout(() => setCopied(false), 1500) }
+  return (
+    <div className="card big">
+      <h3>fxmanifest.lua generator</h3>
+      <p className="muted">Every resource needs this file. Describe the resource, get valid Lua plus the folder layout.</p>
+      <label className="setRow">Resource name<input value={res} onChange={(e) => setRes(e.target.value)} /></label>
+      <label className="setRow">Author<input value={author} onChange={(e) => setAuthor(e.target.value)} /></label>
+      <label className="setRow">Version<input value={version} onChange={(e) => setVersion(e.target.value)} /></label>
+      <input value={fdesc} onChange={(e) => setFdesc(e.target.value)} placeholder="Description" />
+      <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Client scripts (comma separated)" />
+      <input value={server} onChange={(e) => setServer(e.target.value)} placeholder="Server scripts (comma separated)" />
+      <input value={shared} onChange={(e) => setShared(e.target.value)} placeholder="Shared scripts (comma separated)" />
+      <input value={files} onChange={(e) => setFiles(e.target.value)} placeholder="Streamed files, e.g. stream/*.ydr" />
+      <input value={deps} onChange={(e) => setDeps(e.target.value)} placeholder="Dependencies (comma separated)" />
+      <input value={ui} onChange={(e) => setUi(e.target.value)} placeholder="NUI page (optional)" />
+      <label className="setRow">lua54 yes<input type="checkbox" checked={lua54} onChange={(e) => setLua54(e.target.checked)} /></label>
+      <pre className="dump">{fx}</pre>
+      <div className="btnRow">
+        <button onClick={doCopy}>{copied ? 'Copied!' : 'Copy fxmanifest'}</button>
+        <button className="ghost" onClick={() => downloadText('fxmanifest.lua', fx)}>Download .lua</button>
+      </div>
+      <p className="muted">Folder layout:</p>
+      <pre className="dump">{tree}</pre>
+    </div>
+  )
+}
+
+/* ---------- FiveM log doctor + practice console ---------- */
+const LOG_RULES = [
+  { re: /sv_licenseKey|license key.*(invalid|missing|blank)|failed to authenticate/i, title: 'License key problem', fix: 'Generate a fresh key on the Cfx Portal (keymaster) and paste it as sv_licenseKey. The server refuses to boot without a valid one.' },
+  { re: /already in use|EADDRINUSE|bind.*fail|address.*in use|could not bind/i, title: 'Port already in use', fix: 'Something already sits on 30120 (or 40120). Stop the other FXServer, or change endpoint ports if you run two servers.' },
+  { re: /could not find dependency|missing dependency|unsatisfied dependency|dependency .* (not found|missing)/i, title: 'Missing dependency', fix: 'A resource needs another that is not started. Check its fxmanifest dependencies and ensure order: dependencies first.' },
+  { re: /couldn.t start resource|failed to load resource|no such export|no such file|error parsing|syntax error|unexpected symbol|failed to load script/i, title: 'Resource fails to start', fix: 'Read the lines above it: usually a Lua syntax error or a wrong file path in fxmanifest. File names must match exactly.' },
+  { re: /access denied for user|can.t connect to mysql|ECONNREFUSED.*3306|Unknown database|mysql_connection_string/i, title: 'Database connection failed', fix: 'QBCore/ESX need MySQL or MariaDB running with a valid string like mysql://user:password@localhost/fivem?charset=utf8mb4' },
+  { re: /outdated|update.*artifact|server version|game build.*(not supported|mismatch)|recommended.*build/i, title: 'Outdated artifacts or game build', fix: 'Download the RECOMMENDED (not newest) build from runtime.fivem.net and set sv_enforceGameBuild to match your GTA version.' },
+  { re: /ENOTFOUND|getaddrinfo|failed to resolve|network.*unreachable|curl.*(fail|error)|download.*fail/i, title: 'Network / DNS failure', fix: 'The box cannot reach the internet (recipe downloads, key auth). Check DNS, firewall and proxy settings.' },
+  { re: /MSVCP|VCRUNTIME|vcredist|missing.*\.dll/i, title: 'Missing VC++ Redistributable', fix: 'Install Microsoft Visual C++ Redistributable (x64) on Windows. FXServer closes instantly without it.' },
+  { re: /citizen-server-impl|crash|fatal|dump written|assert/i, title: 'Server crash', fix: 'Update artifacts first. If it persists, remove the most recently added resource and retest - crashes are usually one bad resource.' },
+  { re: /txadmin.*(error|fail|denied)|invalid.*pin|pin.*(wrong|expire)/i, title: 'txAdmin access problem', fix: 'Use the 4-digit PIN printed in the console, check TCP 40120 is open, and bind 0.0.0.0 for remote access.' },
+  { re: /onesync.*(error|off|disabled)|onesync required/i, title: 'OneSync issue', fix: 'Set `set onesync on` for 33+ players. Legacy mode caps at 32.' },
+]
+
+function LogDoctor() {
+  const [log, setLog] = useState('')
+  const [result, setResult] = useState(null)
+  const diagnose = () => {
+    const lines = log.split('\n')
+    const found = []
+    LOG_RULES.forEach((r) => {
+      const hits = lines.filter((l) => r.re.test(l))
+      if (hits.length) found.push({ ...r, count: hits.length, sample: hits[0].trim().slice(0, 160) })
+    })
+    const oks = lines.filter((l) => /license key authenticated|server started|started resource|heartbeat|txadmin.*ready/i.test(l)).length
+    setResult({ found, oks, lines: lines.filter(Boolean).length })
+    logEvent('fivem', `log diagnosed: ${found.length} issue types`)
+  }
+  return (
+    <div className="card big">
+      <h3>Log doctor</h3>
+      <p className="muted">Paste your server console output. It flags the usual suspects and tells you the fix for each.</p>
+      <textarea rows="6" value={log} onChange={(e) => setLog(e.target.value)} placeholder={'Paste server.log or console output here…'} />
+      <div className="btnRow">
+        <button onClick={diagnose} disabled={!log.trim()}>Diagnose</button>
+        {result && <button className="ghost" onClick={() => { setLog(''); setResult(null) }}>Clear</button>}
+      </div>
+      {result && (
+        <>
+          {result.found.length === 0
+            ? <p className="muted">No known errors in {result.lines} lines{result.oks ? `, and ${result.oks} healthy signals spotted` : ''} - looks like a clean boot.</p>
+            : result.found.map((f) => (
+              <div key={f.title} className="errBox">
+                <p className="err">{f.title} (x{f.count})</p>
+                <code className="pw small">{f.sample}</code>
+                <p className="muted">Fix: {f.fix}</p>
+              </div>
+            ))}
+        </>
+      )}
+    </div>
+  )
+}
+
+function PracticeTerm() {
+  const [hist, setHist] = useState([{ out: 'txAdmin practice console - learning mode. Nothing here touches a real server. Type help.' }])
+  const [cmd, setCmd] = useState('')
+  const bottomRef = useRef(null)
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [hist])
+  const run = (raw) => {
+    const input = (raw ?? cmd).trim()
+    if (!input) return
+    const [base, ...rest] = input.split(/\s+/)
+    const arg = rest.join(' ')
+    let out = ''
+    switch (base.toLowerCase()) {
+      case 'help':
+        out = 'Commands: ' + FIVEM_COMMANDS.map((c) => c.cmd.split(' ')[0]).filter((v, i, a) => a.indexOf(v) === i).join(', ')
+        break
+      case 'say':
+        out = arg ? `[practice] [server] ${arg}` : 'Usage: say <message>'
+        break
+      case 'status':
+        out = '[practice] hostname "My FiveM Server" | players 3/48 | uptime 00:42:11 (simulated)'
+        break
+      case 'restart':
+      case 'ensure':
+        out = arg ? `[practice] resource '${arg}' ${base}ed (simulated). Real one: Resources tab or this command.` : `Usage: ${base} <resource>`
+        break
+      case 'stop':
+      case 'start':
+        out = arg ? `[practice] resource '${arg}' ${base}ed (simulated).` : `Usage: ${base} <resource>`
+        break
+      case 'refresh':
+        out = '[practice] rescanned resources folder: 2 new folders found (simulated).'
+        break
+      case 'save':
+        out = '[practice] config state saved (simulated).'
+        break
+      case 'kick':
+        out = arg ? `[practice] kicked '${arg}' (simulated). Real kicks need a live server.` : 'Usage: kick <id> [reason]'
+        break
+      case 'clear':
+        setHist([])
+        setCmd('')
+        return
+      default:
+        out = `Unknown command '${base}'. Try help. (Full list with explanations is in the cheat sheet below.)`
+    }
+    setHist((h) => [...h.slice(-60), { cmd: input, out }])
+    setCmd('')
+  }
+  return (
+    <div className="card big">
+      <h3>Practice console</h3>
+      <p className="muted">Learn txAdmin commands safely. Every reply is simulated and labeled.</p>
+      <div className="chatBox termBox">
+        {hist.map((h, i) => (
+          <div key={i} className="chatLine">
+            {h.cmd && <div className="termIn">&gt; {h.cmd}</div>}
+            <div className="termOut">{h.out}</div>
+          </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
+      <div className="chatRow">
+        <input value={cmd} onChange={(e) => setCmd(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && run()} placeholder="try: help" />
+        <button onClick={() => run()}>Run</button>
+      </div>
+    </div>
+  )
+}
+
+function FivemMaker() {
+  return (
+    <>
+      <SectionHead title="FiveM server maker" desc="Everything for standing up a server: setup checklist, working server.cfg and fxmanifest.lua generators, verified converters, a log doctor, and a practice console. One honest limit is below." />
+      <div className="notice"><Terminal size={15} className="hicon" /> <b>About a live console:</b> txAdmin runs ON your server box behind its own login and PIN, and browsers are blocked from reaching it. No static site can remote-control it. So this tab builds everything up to that line: open your real panel at <code>http://YOUR-SERVER-IP:40120</code> for live control.</div>
+      <div className="grid2">
+        <div className="card big">
+          <h3>Setup checklist</h3>
+          <ul className="tips">
+            <li><b>License key (free):</b> Cfx.re account, then Cfx Portal / keymaster, Servers, register a key with any display name. No server IP needed.</li>
+            <li><b>Artifacts:</b> runtime.fivem.net, the RECOMMENDED build (not the newest). Windows needs VC++ Redistributable x64 first.</li>
+            <li><b>Folders:</b> keep replaceable stuff apart, e.g. <code>C:\FXServer\server</code> (artifacts) + <code>C:\FXServer\server-data</code> (your stuff).</li>
+            <li><b>First boot:</b> run FXServer.exe with NO +exec args, open the printed URL, match the 4-digit PIN, link account, set master password.</li>
+            <li><b>Recipe deploy:</b> CFX Default needs no database. QBCore / ESX / vRP need MySQL or MariaDB first, e.g. <code>mysql://user:password@localhost/fivem?charset=utf8mb4</code></li>
+            <li><b>Ports:</b> 30120 TCP+UDP public for players, 40120 TCP private for txAdmin. Forward both on home routers.</li>
+            <li><b>Slots:</b> 48 by default. More needs Element Club Argentum or higher.</li>
+          </ul>
+          <div className="btnRow">
+            <a className="miniLink" href="https://keymaster.fivem.net" target="_blank" rel="noreferrer">keymaster (keys)</a>
+            <a className="miniLink" href="https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/" target="_blank" rel="noreferrer">artifacts (win)</a>
+            <a className="miniLink" href="https://docs.fivem.net/docs/resources/txAdmin/" target="_blank" rel="noreferrer">txAdmin docs</a>
+          </div>
+        </div>
+        <div className="card">
+          <h3>Converters + map tools</h3>
+          <p className="muted">Turn GTA5-Mods downloads into server-ready resources.</p>
+          {FIVEM_CONVERTERS.map((c) => (
+            <a key={c.name} className="linkRow" href={c.url} target="_blank" rel="noreferrer">
+              <b>{c.name}{c.tag ? ` - ${c.tag}` : ''}</b><span>{c.desc}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+      <div className="grid2">
+        <CfgGen />
+        <FxGen />
+      </div>
+      <div className="grid2">
+        <LogDoctor />
+        <PracticeTerm />
+      </div>
+      <div className="card">
+        <h3>Console cheat sheet</h3>
+        <p className="muted">Real FXServer / txAdmin commands. Practice them above, run them for real in txAdmin.</p>
+        <div className="kv">
+          {FIVEM_COMMANDS.map((c) => (
+            <div key={c.cmd} className="row">
+              <span>{c.cmd.split(' ')[0]}</span>
+              <code>{c.cmd}</code>
+              <button className="ghost sm" onClick={() => copy(c.cmd.split(' ')[0] + ' ')}>copy</button>
+            </div>
+          ))}
+        </div>
+        <p className="muted">The copy button grabs the command word - add your own resource name or player ID after it.</p>
+      </div>
+    </>
+  )
+}
+
 /* ---------- Settings ---------- */
 function Settings({ settings, update, reset, customSites, setCustomSites }) {
   const [imp, setImp] = useState('')
@@ -3333,6 +3653,7 @@ export default function App() {
         {tab === 'tempfiles' && <TempFiles query={query} />}
         {tab === 'sites' && <CoolSites query={query} customSites={customSites} onAdd={addSite} onDelete={delSite} />}
         {tab === 'mods' && <Mods query={query} />}
+        {tab === 'fivem' && <FivemMaker />}
         {tab === 'download' && <Downloader />}
         {tab === 'playlists' && <Playlists />}
         {tab === 'software' && <Software query={query} />}

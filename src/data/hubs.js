@@ -365,3 +365,31 @@ export const EVENTS = [
   { title: 'Game night #1', date: 'TBD - vote in Discord', desc: 'First community game night. Game and date get voted in #general.' },
   { title: 'Tool drop Friday', date: 'Every Friday', desc: 'New sites and tools land on LootCave. Fuel comes from the Recommend tab.' },
 ]
+
+// GTA mod -> FiveM converters and map tools. Verified working, legit sources.
+export const FIVEM_CONVERTERS = [
+  { name: 'ZeroDream Converter', url: 'https://convert.cfx.rs/en', desc: 'By Akkariin: GTA5-Mods straight to FiveM-ready zips, online. Also a userscript for one-click convert on gta5-mods pages. Start here.', tag: 'online - recommended' },
+  { name: 'ThomasCreasey Converter', url: 'https://github.com/ThomasCreasey/FiveM-GTA5Mods-Converter', desc: 'Open-source vehicle converter (beta): paste a GTA5-Mods link + spawn code, get a resource folder.' },
+  { name: 'vscorpio AddOn Converter', url: 'https://forum.cfx.re/t/gta5-mods-to-fivem-addon-converter/1142154', desc: 'Desktop vehicle converter with a vMenu addons.json helper. Needs your GTA folder set.' },
+  { name: 'YMAP Props Converter', url: 'https://github.com/LegendsTeamDev/YMAP-to-FiveM-quant-Converter', desc: 'Node tool: turns YMAP XML into prop tables for scripts.' },
+  { name: 'OpenIV', url: 'https://openiv.com', desc: 'Extract mod archives before converting anything. Required first step.' },
+  { name: 'CodeWalker', url: 'https://github.com/dexyfex/CodewalkerRPF', desc: 'Map editor for custom MLOs and map mods. For builders.' },
+]
+
+// Real FXServer / txAdmin console commands for the cheat sheet + practice terminal.
+export const FIVEM_COMMANDS = [
+  { cmd: 'help', desc: 'List all console commands.' },
+  { cmd: 'restart <resource>', desc: 'Restart a resource (txAdmin Resources tab does this too).' },
+  { cmd: 'ensure <resource>', desc: 'Start it if stopped, restart it if running.' },
+  { cmd: 'stop <resource> / start <resource>', desc: 'Unload / load a resource.' },
+  { cmd: 'refresh', desc: 'Rescan the resources folder for new folders.' },
+  { cmd: 'say <message>', desc: 'Broadcast to in-game chat.' },
+  { cmd: 'kick <id> [reason]', desc: 'Kick a player by server ID.' },
+  { cmd: 'ban <id> [reason]', desc: 'Ban a player.' },
+  { cmd: 'save', desc: 'Save current config state.' },
+  { cmd: 'status', desc: 'Hostname, players, uptime.' },
+  { cmd: 'heartbeat', desc: 'Force a server-list heartbeat.' },
+  { cmd: 'set <key> <value>', desc: 'Change a convar live, e.g. set sv_hostname "New Name".' },
+  { cmd: 'exec <file>', desc: 'Execute a cfg file.' },
+  { cmd: 'quit', desc: 'Stop the server (console only).' },
+]

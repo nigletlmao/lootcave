@@ -2,7 +2,7 @@
 // Edit labels/descriptions freely. Icons come from lucide.dev (see package.json: lucide-react).
 import {
   BookOpen, Bot, Coffee, Download, FileUp, Flower2, Gamepad2, Globe, Home, IdCard, Info, Laptop, Laugh, ListMusic, Lock, Mail,
-  MessageCircle, Moon, Send, Server, Settings, Smartphone, Snowflake, Sparkles, Sun, Sunset, Terminal,
+  MessageCircle, Moon, Send, Server, ServerCog, Settings, Smartphone, Snowflake, Sparkles, Sun, Sunset, Terminal,
   Waves, Wrench, Zap,
 } from 'lucide-react'
 
@@ -14,6 +14,7 @@ export const TABS = [
   { id: 'tempfiles', label: 'Temp Files', icon: FileUp },
   { id: 'sites', label: 'Cool Sites', icon: Globe },
   { id: 'mods', label: 'Mods', icon: Gamepad2 },
+  { id: 'fivem', label: 'Server Maker', icon: ServerCog },
   { id: 'download', label: 'Downloader', icon: Download },
   { id: 'playlists', label: 'Playlists', icon: ListMusic },
   { id: 'software', label: 'Software', icon: Laptop },
@@ -31,7 +32,7 @@ export const TABS = [
 
 export const NAV_GROUPS = [
   { label: 'Temp stuff', ids: ['email', 'numbers', 'ids', 'tempfiles'] },
-  { label: 'Discover', ids: ['sites', 'software', 'mods', 'download', 'playlists'] },
+  { label: 'Discover', ids: ['sites', 'software', 'mods', 'fivem', 'download', 'playlists'] },
   { label: 'Toolbox', ids: ['tools', 'pranks', 'ai'] },
   { label: 'Community', ids: ['chat', 'guide'] },
   { label: 'System', ids: ['system', 'admin'] },
@@ -45,6 +46,7 @@ export const TAB_BLURBS = {
   tempfiles: 'Files that expire: upload once, share the link, gone on a timer. No accounts.',
   sites: 'Hand-picked directory: security, adblock, sims, design, learning, Reddit gems, hosting, AI, utils + legal streaming. You can add your own.',
   mods: 'Mod hubs for FiveM, Minecraft, GTA V, Bethesda games, Sims and more - plus the managers that install them.',
+  fivem: 'Build a FiveM server: setup guide, cfg and fxmanifest generators, converters, log doctor, practice console.',
   download: 'YouTube and media downloading: copy-paste yt-dlp commands for MP3/MP4 plus the best no-install tools.',
   playlists: 'Move music between apps: auto-read YouTube playlists, convert any track list, export anywhere.',
   software: 'Essential free software everyone should have - browsers, media, utilities, dev tools, launchers.',
