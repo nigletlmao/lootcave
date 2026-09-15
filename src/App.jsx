@@ -3,7 +3,7 @@ import { generateSecretKey, getPublicKey, finalizeEvent, SimplePool, nip19 } fro
 import {
   Binary, CaseSensitive, ClipboardList, Clock, Copy, Dices, ExternalLink,
   Fingerprint, FileJson, Gem, Globe, HardDrive, Hash, Home as HomeIcon, IdCard, Images, KeyRound,
-  Laugh, Link2, Mail, Menu, MessageCircle, MousePointerClick, Music, Palette, Pencil, Plus, QrCode,
+  Laugh, Link2, Mail, MailOpen, Menu, MessageCircle, MousePointerClick, Music, Palette, Pencil, Plus, QrCode,
   RefreshCw, RotateCcw, Ruler, Scale, ScanSearch, Send, Settings as SettingsIcon, ShieldCheck, Smartphone,
   Star, Target, TextQuote, Timer, TriangleAlert, Tv, UserCheck, Wifi, Wrench, ChevronDown, Info,
 } from 'lucide-react'
@@ -181,7 +181,7 @@ function makeIdentity() {
   return {
     name: `${f} ${l}`,
     username: user,
-    email: `${user}@1secmail.com`,
+    email: `${user}@${rand(['1secmail.com', '1secmail.org', '1secmail.net'])}`,
     password: Math.random().toString(36).slice(2, 6) + '!' + Math.random().toString(36).slice(2, 8) + digits(2),
     phone: `+1 (${digits(3)}) ${digits(3)}-${digits(4)}`,
     dob: `${1 + Math.floor(Math.random() * 12)}/${1 + Math.floor(Math.random() * 28)}/${1988 + Math.floor(Math.random() * 18)}`,
@@ -262,8 +262,7 @@ function Home({ go }) {
 }
 
 /* ---------- Temp Email (1secmail + automatic route fallback) ---------- */
-function TempEmail({ refreshSec, auto }) {
-  const [mailbox, setMailbox] = useState('')
+function TempEmail({ refreshSec, auto, mailbox, setMailbox }) {
   const [messages, setMessages] = useState([])
   const [opened, setOpened] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -293,7 +292,7 @@ function TempEmail({ refreshSec, auto }) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [setMailbox])
 
   const refresh = useCallback(async () => {
     if (!login) return
@@ -320,7 +319,7 @@ function TempEmail({ refreshSec, auto }) {
     }
   }
 
-  useEffect(() => { newAddress() }, [newAddress])
+  useEffect(() => { if (!mailbox) newAddress() }, [mailbox, newAddress])
   useEffect(() => {
     if (!login || !auto) return
     const t = setInterval(refresh, Math.max(5, refreshSec) * 1000)
@@ -404,7 +403,7 @@ function TempNumbers({ query }) {
 }
 
 /* ---------- Fake IDs ---------- */
-function FakeIDs() {
+function FakeIDs({ openInbox }) {
   const [id, setId] = useState(() => makeIdentity())
   const [saved, setSaved] = useState(() => {
     try {
@@ -423,7 +422,7 @@ function FakeIDs() {
   }
   return (
     <>
-      <SectionHead title="Fake identity generator" desc="One click builds a full test persona - name, login, email, password, phone, birthday, address, company. Everything is random and local to your browser." />
+      <SectionHead title="Fake identity generator" desc="One click builds a full test persona - name, login, email, password, phone, birthday, address, company. And yes, the email really works: 1secmail accepts mail for ANY address with zero signup, so hit inbox on the email row to open it live." />
       <div className="grid2">
         <div className="card big">
           <div className="kv">
@@ -431,7 +430,10 @@ function FakeIDs() {
               <div key={k} className="row">
                 <span>{k}</span>
                 <code>{v}</code>
-                <button className="ghost sm" onClick={() => copy(v)}>copy</button>
+                <span className="btnRow" style={{ marginTop: 0 }}>
+                  <button className="ghost sm" onClick={() => copy(v)}>copy</button>
+                  {k === 'email' && <button className="ghost sm" onClick={() => openInbox(v)}><MailOpen size={13} className="btnIcon" /> inbox</button>}
+                </span>
               </div>
             ))}
           </div>
@@ -3159,6 +3161,7 @@ export default function App() {
   const [query, setQuery] = useState('')
   const [searchMsg, setSearchMsg] = useState('')
   const [customSites, setCustomSites] = useState(loadCustomSites)
+  const [inboxAddress, setInboxAddress] = useState('')
   const [navOpen, setNavOpen] = useState(false)
   const [openGroups, setOpenGroups] = useState([])
   const toggleGroup = (label) => setOpenGroups((o) => o.includes(label) ? o.filter((l) => l !== label) : [...o, label])
@@ -3324,9 +3327,9 @@ export default function App() {
         )}
       <main key={tab}>
         {tab === 'home' && <Home go={go} />}
-        {tab === 'email' && <TempEmail refreshSec={settings.refreshSec} auto={settings.emailAuto} />}
+        {tab === 'email' && <TempEmail refreshSec={settings.refreshSec} auto={settings.emailAuto} mailbox={inboxAddress} setMailbox={setInboxAddress} />}
         {tab === 'numbers' && <TempNumbers query={query} />}
-        {tab === 'ids' && <FakeIDs />}
+        {tab === 'ids' && <FakeIDs openInbox={(addr) => { setInboxAddress(addr); go('email') }} />}
         {tab === 'tempfiles' && <TempFiles query={query} />}
         {tab === 'sites' && <CoolSites query={query} customSites={customSites} onAdd={addSite} onDelete={delSite} />}
         {tab === 'mods' && <Mods query={query} />}
