@@ -2,17 +2,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { generateSecretKey, getPublicKey, finalizeEvent, SimplePool, nip19 } from 'nostr-tools'
 import {
   Binary, CaseSensitive, ClipboardList, Clock, Copy, Dices, ExternalLink,
-  Fingerprint, FileJson, Gem, Globe, HardDrive, Hash, Home as HomeIcon, IdCard, Images, KeyRound,
-  Laugh, Link2, Mail, MailOpen, Menu, MessageCircle, MousePointerClick, Music, Palette, Pencil, Plus, QrCode,
-  RefreshCw, RotateCcw, Ruler, Scale, ScanSearch, Send, Settings as SettingsIcon, ShieldCheck, Smartphone,
+  Fingerprint, FileJson, Gem, Globe, HardDrive, Hash, Home as HomeIcon, Images, KeyRound,
+  Laugh, Link2, MailOpen, Menu, MessageCircle, MousePointerClick, Music, Palette, Pencil, Plus, QrCode,
+  RefreshCw, RotateCcw, Ruler, Scale, ScanSearch, Send, Settings as SettingsIcon, ShieldCheck,
   Star, Target, Terminal, TextQuote, Timer, TriangleAlert, Tv, UserCheck, Wifi, Wrench, ChevronDown, Info,
 } from 'lucide-react'
 import './App.css'
 
-import { TABS, TAB_BLURBS, THEMES, NAV_GROUPS } from './data/ui.js'
+import { TABS, TAB_BLURBS, THEMES, NAV_GROUPS, CAT_META, GAME_META, GROUP_META, TEMP_META, SMS_META } from './data/ui.js'
 
 const DEFAULT_SETTINGS = {
-  theme: 'midnight',
+  theme: 'fmhy',
   fontScale: 'medium',
   defaultTab: 'home',
   refreshSec: 12,
@@ -33,6 +33,7 @@ const DEFAULT_SETTINGS = {
   customTagline: '',
   emailAuto: true,
   discordInvite: 'https://discord.gg/YWhFwTxP8h',
+  adClient: '',
 }
 
 function loadSettings() {
@@ -41,7 +42,7 @@ function loadSettings() {
     if (!raw) return DEFAULT_SETTINGS
     const s = { ...DEFAULT_SETTINGS, ...JSON.parse(raw) }
     // sanitize - a bad stored value must never nuke the theme
-    if (!THEMES.some((t) => t.id === s.theme)) s.theme = 'midnight'
+    if (!THEMES.some((t) => t.id === s.theme)) s.theme = 'fmhy'
     if (!['small', 'medium', 'large'].includes(s.fontScale)) s.fontScale = 'medium'
     if (!TABS.some((t) => t.id === s.defaultTab)) s.defaultTab = 'home'
     if (!Array.isArray(s.hiddenTabs)) s.hiddenTabs = []
@@ -169,25 +170,102 @@ function copy(text) {
 const rand = (arr) => arr[Math.floor(Math.random() * arr.length)]
 const digits = (n) => Array.from({ length: n }, () => Math.floor(Math.random() * 10)).join('')
 
-function makeIdentity() {
-  const first = ['Alex', 'Maya', 'Leo', 'Zoe', 'Kai', 'Nova', 'Rex', 'Ivy', 'Jude', 'Luna', 'Milo', 'Aria']
-  const last = ['Carter', 'Voss', 'Marsh', 'Quinn', 'Slater', 'Reyes', 'Frost', 'Hale', 'Draper', 'Stone']
-  const cities = ['Austin TX', 'Berlin DE', 'Toronto CA', 'London UK', 'Miami FL', 'Amsterdam NL', 'Sydney AU']
-  const streets = ['Maple Ave', 'Neon Blvd', 'Harbor St', 'Pixel Rd', 'Ghost Ln', 'Circuit Dr']
-  const companies = ['Null Labs', 'Ghostware', 'PixelForge', 'Vapor Inc', 'Bitdrift', 'Lootworks']
-  const f = rand(first)
-  const l = rand(last)
-  const user = `${f.toLowerCase()}${l.toLowerCase()}${Math.floor(Math.random() * 99)}`
+/* ---------- Realistic identity engine: per-country formats ----------
+   Everything is random and clearly marked SAMPLE. ID numbers use shapes
+   that cannot be real (e.g. SSN area 900+) so a generated identity can
+   never collide with a living person's documents. */
+const LOCALES = {
+  usa: {
+    label: 'USA', dateFmt: (d, m, y) => `${m}/${d}/${y}`,
+    first: ['James', 'Emma', 'Liam', 'Olivia', 'Noah', 'Ava', 'Ethan', 'Sophia', 'Mason', 'Mia'],
+    last: ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Garcia', 'Wilson', 'Anderson'],
+    cities: ['Austin TX', 'Miami FL', 'Seattle WA', 'Denver CO', 'Chicago IL', 'Boston MA'],
+    streets: ['Maple Ave', 'Oak St', 'Cedar Blvd', 'Pine Rd', 'Elm Dr', 'Lakeview Ave'],
+    zip: () => digits(5),
+    phone: () => `+1 (${200 + Math.floor(Math.random() * 789)}) ${digits(3)}-${digits(4)}`,
+    idLabel: 'SSN', idNum: () => `9${digits(2)}-${digits(2)}-${digits(4)}`,
+  },
+  uk: {
+    label: 'UK', dateFmt: (d, m, y) => `${d}/${m}/${y}`,
+    first: ['Oliver', 'Amelia', 'George', 'Isla', 'Harry', 'Poppy', 'Jack', 'Lily', 'Charlie', 'Daisy'],
+    last: ['Smith', 'Jones', 'Taylor', 'Davies', 'Wilson', 'Evans', 'Thomas', 'Roberts', 'Walker', 'Wright'],
+    cities: ['London', 'Manchester', 'Birmingham', 'Leeds', 'Bristol', 'Sheffield'],
+    streets: ['High St', 'Church Rd', 'Station Rd', 'Park Ave', 'Victoria St', 'Mill Lane'],
+    zip: () => `${rand(['E', 'SW', 'M', 'B', 'N', 'SE'])}${1 + Math.floor(Math.random() * 20)} ${Math.floor(Math.random() * 9)}${rand(['AB', 'CD', 'EF', 'GH', 'JK', 'LM', 'NP', 'RT', 'WX', 'YZ'])}`,
+    phone: () => `+44 7${3 + Math.floor(Math.random() * 6)}${digits(2)} ${digits(6)}`,
+    idLabel: 'NINO', idNum: () => `${rand(['AB', 'CE', 'JL', 'NM', 'RS', 'TW'])} ${digits(2)} ${digits(2)} ${digits(2)} ${rand(['A', 'B', 'C', 'D'])}`,
+  },
+  de: {
+    label: 'Germany', dateFmt: (d, m, y) => `${d}.${m}.${y}`,
+    first: ['Lukas', 'Anna', 'Leon', 'Marie', 'Finn', 'Lena', 'Paul', 'Clara', 'Felix', 'Mia'],
+    last: ['Muller', 'Schmidt', 'Schneider', 'Fischer', 'Weber', 'Meyer', 'Wagner', 'Becker', 'Schulz', 'Hoffmann'],
+    cities: ['Berlin', 'Hamburg', 'Munchen', 'Koln', 'Frankfurt', 'Dresden'],
+    streets: ['Hauptstrasse', 'Bahnhofstrasse', 'Gartenweg', 'Schulstrasse', 'Lindenallee', 'Rosenweg'],
+    zip: () => `${1 + Math.floor(Math.random() * 9)}${digits(4)}`,
+    phone: () => `+49 1${5 + Math.floor(Math.random() * 2)}${digits(1)} ${digits(7)}`,
+    idLabel: 'ID No.', idNum: () => digits(9),
+  },
+  no: {
+    label: 'Norway', dateFmt: (d, m, y) => `${d}.${m}.${y}`,
+    first: ['Jakob', 'Nora', 'Emil', 'Sofie', 'Lucas', 'Ella', 'Oliver', 'Alma', 'Liam', 'Olivia'],
+    last: ['Hansen', 'Olsen', 'Johansen', 'Larsen', 'Andersen', 'Nilsen', 'Pedersen', 'Kristiansen', 'Jensen', 'Haugen'],
+    cities: ['Oslo', 'Bergen', 'Trondheim', 'Stavanger', 'Tromso', 'Fredrikstad'],
+    streets: ['Storgata', 'Markveien', 'Kirkeveien', 'Parkveien', 'Mollergata', 'Fjordveien'],
+    zip: () => String(1 + Math.floor(Math.random() * 9998)).padStart(4, '0'),
+    phone: () => `+47 ${rand(['4', '9'])}${digits(2)} ${digits(2)} ${digits(2)}`,
+    idLabel: 'Fødselsnr', idNum: (d, m, y) => `${d}${m}${String(y).slice(2)}${digits(5)}`,
+  },
+}
+
+const JOBS = ['Barista', 'Nurse', 'Software developer', 'Teacher', 'Electrician', 'Graphic designer', 'Chef', 'Accountant', 'Mechanic', 'Student', 'Photographer', 'Plumber']
+const COMPANIES = ['Null Labs', 'Ghostware', 'PixelForge', 'Vapor Inc', 'Bitdrift', 'Lootworks', 'Nordlys Media', 'Fjord Logistics', 'Harbor and Co', 'Brightline Studio']
+const HOBBIES = ['hiking', 'gaming', 'photography', 'cooking', 'cycling', 'reading', 'skiing', 'drawing']
+const AVATAR_GRADS = [
+  ['#7c5cff', '#00e5cc'], ['#f17c67', '#eab308'], ['#38bdf8', '#8A6BBE'], ['#3ccd93', '#0ea5e9'],
+]
+
+// Fills gaps in identities saved before a field existed, so old saves load cleanly.
+function normalizeId(s) {
   return {
+    locale: 'USA', job: 'Freelancer', age: '?', idLabel: 'ID', idNum: '-',
+    bio: 'No bio on file.', grad: AVATAR_GRADS[0],
+    emailWorks: String((s && s.email) || '').includes('1secmail'),
+    ...(s || {}),
+  }
+}
+
+function makeIdentity(localeKey) {
+  const loc = LOCALES[localeKey] || LOCALES.usa
+  const f = rand(loc.first)
+  const l = rand(loc.last)
+  const plain = `${f}${l}`.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '')
+  const user = `${plain}${Math.floor(Math.random() * 99)}`
+  const emailUser = `${f.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '')}.${l.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '')}${Math.floor(Math.random() * 89 + 10)}`
+  const day = String(1 + Math.floor(Math.random() * 28)).padStart(2, '0')
+  const month = String(1 + Math.floor(Math.random() * 12)).padStart(2, '0')
+  const year = 1968 + Math.floor(Math.random() * 38)
+  const age = new Date().getFullYear() - year
+  const city = rand(loc.cities)
+  const job = rand(JOBS)
+  const domain = rand(['1secmail.com', '1secmail.com', '1secmail.org', 'gmail.com', 'outlook.com'])
+  return {
+    locale: loc.label,
     name: `${f} ${l}`,
     username: user,
-    email: `${user}@${rand(['1secmail.com', '1secmail.org', '1secmail.net'])}`,
+    email: `${emailUser}@${domain}`,
+    emailWorks: domain.startsWith('1secmail'),
     password: Math.random().toString(36).slice(2, 6) + '!' + Math.random().toString(36).slice(2, 8) + digits(2),
-    phone: `+1 (${digits(3)}) ${digits(3)}-${digits(4)}`,
-    dob: `${1 + Math.floor(Math.random() * 12)}/${1 + Math.floor(Math.random() * 28)}/${1988 + Math.floor(Math.random() * 18)}`,
-    address: `${100 + Math.floor(Math.random() * 8900)} ${rand(streets)}, ${rand(cities)}`,
-    company: rand(companies),
+    phone: loc.phone(),
+    dob: loc.dateFmt(day, month, year),
+    age: `${age} years old`,
+    address: `${1 + Math.floor(Math.random() * 199)} ${rand(loc.streets)}, ${loc.zip()} ${city}`,
+    idLabel: loc.idLabel,
+    idNum: loc.idNum(day, month, year),
+    job,
+    company: rand(COMPANIES),
+    bio: `${f} is a ${age}-year-old ${job.toLowerCase()} based in ${city.split(' ')[0]}. Into ${rand(HOBBIES)} and ${rand(HOBBIES)}.`,
     uuid: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+    grad: rand(AVATAR_GRADS),
   }
 }
 
@@ -201,14 +279,15 @@ function Home({ go }) {
   const statFiles = TEMP_FILES.length
   return (
     <>
-      <div className="hero card big">
-        <h1>Welcome to lootcave</h1>
-        <p>Your localhost stash of useful internet throwaways: disposable emails with a <b>live inbox</b>, public SMS receivers, fake test identities, a hand-picked directory of free tools, and tiny dev utilities. Static only - no backend, no tracking, runs with <code>npm run dev</code>.</p>
-        <div className="btnRow">
-          <button onClick={() => go('email')}><Mail size={15} className="btnIcon" /> Get temp email</button>
-          <button className="ghost" onClick={() => go('numbers')}><Smartphone size={15} className="btnIcon" /> Find temp number</button>
-          <button className="ghost" onClick={() => go('ids')}><IdCard size={15} className="btnIcon" /> Generate ID</button>
-          <button className="ghost" onClick={() => go('settings')}><SettingsIcon size={15} className="btnIcon" /> Customize theme</button>
+      <div className="hero">
+        <span className="pillBadge">Updated: AI Helper, Playlists, Server Maker</span>
+        <h1 className="gradName">lootcave</h1>
+        <p className="tagline">The largest stash of free throwaway tools on the internet. No accounts, no tracking, no paywalls.</p>
+        <div className="btnRow heroActions">
+          <button onClick={() => go('email')}>Get temp email</button>
+          <button className="ghost" onClick={() => go('sites')}>Cool sites</button>
+          <button className="ghost" onClick={() => go('chat')}>Live chat</button>
+          <button className="ghost" onClick={() => go('recommend')}>Contribute</button>
         </div>
       </div>
       <SectionHead title="About LootCave" desc="The short version: what this is, why it exists, and how to use it. The full story lives on the About page, pinned at the bottom of the sidebar." />
@@ -248,14 +327,6 @@ function Home({ go }) {
             </div>
           </div>
         </div>
-      </div>
-      <div className="card">
-        <h3><ShieldCheck size={16} className="hicon" /> House rules</h3>
-        <ul className="tips">
-          <li><b>Public = public.</b> Free temp numbers and emails can be read by strangers - never banking, recovery, or sensitive accounts.</li>
-          <li><b>Test IDs only.</b> Fake identities are for dev signups, never KYC or legal documents.</li>
-          <li><b>Legal streaming only.</b> Pirate sites mean malware + takedowns, so the directory lists licensed free options instead.</li>
-        </ul>
       </div>
     </>
   )
@@ -391,6 +462,7 @@ function TempNumbers({ query }) {
       <div className="cards">
         {list.map((s) => (
           <a key={s.name} className="card link" href={s.url} target="_blank" rel="noreferrer">
+            <span className="catIcon" style={{ color: SMS_META.color }}><SMS_META.icon size={22} /></span>
             <h3>{s.name} <ExternalLink size={13} className="hicon" /></h3>
             <p>{s.desc}</p>
             <code>{s.url.replace('https://', '')}</code>
@@ -402,9 +474,10 @@ function TempNumbers({ query }) {
   )
 }
 
-/* ---------- Fake IDs ---------- */
+/* ---------- Fake IDs: locale-realistic sample identities ---------- */
 function FakeIDs({ openInbox }) {
-  const [id, setId] = useState(() => makeIdentity())
+  const [locale, setLocale] = useState('usa')
+  const [id, setId] = useState(() => makeIdentity('usa'))
   const [saved, setSaved] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('lootcave-saved-ids') || '[]')
@@ -420,35 +493,77 @@ function FakeIDs({ openInbox }) {
     setSaved((a) => [{ ...id }, ...a].slice(0, 20))
     logEvent('ids', 'identity saved: ' + id.username)
   }
+  const regen = (loc) => {
+    const l = loc || locale
+    setLocale(l)
+    setId(makeIdentity(l))
+  }
+  const initials = id.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+  const rows = [
+    ['Full name', id.name, null],
+    ['Username', id.username, null],
+    ['Email', id.email, id.emailWorks ? 'inbox' : null],
+    ['Password', id.password, null],
+    ['Phone', id.phone, null],
+    ['Born', `${id.dob} (${id.age})`, null],
+    ['Address', id.address, null],
+    [id.idLabel, id.idNum, null],
+    ['Job', `${id.job} at ${id.company}`, null],
+    ['Bio', id.bio, null],
+    ['UUID', id.uuid, null],
+  ]
   return (
     <>
-      <SectionHead title="Fake identity generator" desc="One click builds a full test persona - name, login, email, password, phone, birthday, address, company. And yes, the email really works: 1secmail accepts mail for ANY address with zero signup, so hit inbox on the email row to open it live." />
+      <SectionHead title="Fake identity generator" desc="Documents so realistic they need a SAMPLE stamp: pick a country for correct address, phone, birthday and ID formats. Details stay coherent (one name, one city, one age everywhere). Testing and signups only - never legal documents." />
+      <div className="btnRow">
+        {Object.keys(LOCALES).map((k) => (
+          <button key={k} className={locale === k ? '' : 'ghost sm'} onClick={() => regen(k)}>{LOCALES[k].label}</button>
+        ))}
+      </div>
       <div className="grid2">
-        <div className="card big">
-          <div className="kv">
-            {Object.entries(id).map(([k, v]) => (
-              <div key={k} className="row">
-                <span>{k}</span>
-                <code>{v}</code>
-                <span className="btnRow" style={{ marginTop: 0 }}>
-                  <button className="ghost sm" onClick={() => copy(v)}>copy</button>
-                  {k === 'email' && <button className="ghost sm" onClick={() => openInbox(v)}><MailOpen size={13} className="btnIcon" /> inbox</button>}
-                </span>
+        <div className="cards single">
+          <div className="idcard" style={{ '--id1': id.grad[0], '--id2': id.grad[1] }}>
+            <span className="sampleTag">SAMPLE</span>
+            <div className="idPhoto">{initials}</div>
+            <div className="idMain">
+              <span className="idCountry">{id.locale} - TEST IDENTITY</span>
+              <b className="idName">{id.name}</b>
+              <div className="idGrid">
+                <div><span>DOB</span><code>{id.dob}</code></div>
+                <div><span>{id.idLabel}</span><code>{id.idNum}</code></div>
               </div>
-            ))}
+              <span className="idAddr">{id.address}</span>
+            </div>
+            <div className="idBarcode" />
           </div>
-          <div className="btnRow">
-          <button onClick={() => setId(makeIdentity())}><Dices size={15} className="btnIcon" /> Generate new</button>
-          <button className="ghost" onClick={() => copy(Object.values(id).join('\n'))}><Copy size={15} className="btnIcon" /> Copy all</button>
-          <button className="ghost" onClick={saveId}>Save this ID</button>
+          <div className="card">
+            <h3>Full profile</h3>
+            <div className="kv">
+              {rows.map(([k, v, action]) => (
+                <div key={k} className="row">
+                  <span>{k}</span>
+                  <code>{v}</code>
+                  <span className="btnRow" style={{ marginTop: 0 }}>
+                    <button className="ghost sm" onClick={() => copy(v)}>copy</button>
+                    {action === 'inbox' && <button className="ghost sm" onClick={() => openInbox(v)}><MailOpen size={13} className="btnIcon" /> inbox</button>}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="btnRow">
+              <button onClick={() => regen()}><Dices size={15} className="btnIcon" /> Generate new</button>
+              <button className="ghost" onClick={() => copy(rows.map((r) => `${r[0]}: ${r[1]}`).join('\n'))}><Copy size={15} className="btnIcon" /> Copy all</button>
+              <button className="ghost" onClick={saveId}>Save this ID</button>
+            </div>
+            {!id.emailWorks && <p className="muted">This one landed on a lookalike inbox ({id.email.split('@')[1]}) - regenerate until you get a 1secmail address for a working inbox.</p>}
           </div>
         </div>
         <div className="card">
           <h2>How to use + tips</h2>
           <ul className="tips">
-            <li><b>Throwaway signups:</b> paste the email into Temp Email, the password straight into the form.</li>
-            <li><b>Testing:</b> devs use these to fill forms without touching real data.</li>
-            <li><b>Passwords:</b> always generate a unique one per site - or use Mini Tools for full control.</li>
+            <li><b>Throwaway signups:</b> the email row opens a live inbox when it is a 1secmail address.</li>
+            <li><b>Coherent by design:</b> name, city, phone, birthday and ID number all follow one country's real formats.</li>
+            <li><b>Still fake:</b> ID numbers use shapes no real document can have. The SAMPLE stamp is the point.</li>
             <li><b>Never</b> use fake details for KYC, banking, or legal documents. That's fraud.</li>
           </ul>
         </div>
@@ -474,7 +589,7 @@ function FakeIDs({ openInbox }) {
             <span>{s.username}</span>
             <code>{s.name}</code>
             <span className="btnRow" style={{ marginTop: 0 }}>
-              <button className="ghost sm" onClick={() => setId({ ...s })}>load</button>
+              <button className="ghost sm" onClick={() => setId(normalizeId({ ...s }))}>load</button>
               <button className="ghost sm" onClick={() => setSaved((a) => a.filter((x) => x.username !== s.username))}>remove</button>
             </span>
           </div>
@@ -531,15 +646,20 @@ function CoolSites({ query, customSites, onAdd, onDelete }) {
   const shown = [...new Set(list.map((s) => s.cat))].sort((a, b) => order(a) - order(b))
   const inCat = (c) => list.filter((s) => s.cat === c).sort((a, b) => a.name.localeCompare(b.name))
   const recs = list.filter((s) => RECOMMENDED.has(s.name))
-  const siteCard = (s) => (
+  const siteCard = (s) => {
+    const meta = CAT_META[s.cat]
+    const CatIcon = meta && meta.icon
+    return (
     <div key={s.name + s.url} className="card linkWrap">
       <a className="linkMain" href={s.url} target="_blank" rel="noreferrer">
-                <h3>{s.name} {s.custom ? <Pencil size={13} className="hicon" /> : <ExternalLink size={13} className="hicon" />} {RECOMMENDED.has(s.name) && <span className="recBadge" title="Recommended"><Star size={11} /></span>}</h3>
+        {CatIcon && <span className="catIcon" style={{ color: meta.color }}><CatIcon size={22} /></span>}
+        <h3>{s.name} {s.custom ? <Pencil size={13} className="hicon" /> : <ExternalLink size={13} className="hicon" />} {RECOMMENDED.has(s.name) && <span className="recBadge" title="Recommended"><Star size={11} /></span>}</h3>
         <p>{s.desc}</p>
       </a>
       {s.custom && <button className="ghost sm" onClick={() => onDelete(s.url)}>remove</button>}
     </div>
-  )
+    )
+  }
   return (
     <>
       <SectionHead title="Cool sites directory" desc={`${all.length} entries and counting. Every entry has a description so you know WHY it's here. Search filters everything. Add your own at the bottom - custom entries are marked with a pencil and can be deleted.`} />
@@ -1659,20 +1779,25 @@ function Mods({ query }) {
     <>
       <SectionHead title="Mod hubs" desc="Where to get mods for FiveM, Minecraft, GTA V and basically every moddable game - the communities everyone actually uses, not shady re-upload aggregators." />
       <div className="notice"><ShieldCheck size={15} className="hicon" /> <b>Mod safety:</b> download from the hubs below, never random Discord links. Scan archives (VirusTotal tab ↑), avoid any "mod" that is a <b>.exe</b>, back up saves first - and keep story-mode mods out of <b>GTA Online</b> unless you enjoy bans.</div>
-      {games.map((g) => (
+      {games.map((g) => {
+        const gm = GAME_META[g.game]
+        const GameIcon = gm && gm.icon
+        return (
         <div key={g.game}>
           <h3 className="cat">{g.game} <span className="countBadge">{g.sites.length}</span></h3>
           <p className="catDesc">{g.desc}</p>
           <div className="cards">
             {g.sites.map((s) => (
               <a key={s.name} className="card link" href={s.url} target="_blank" rel="noreferrer">
+                {GameIcon && <span className="catIcon" style={{ color: gm.color }}><GameIcon size={22} /></span>}
                 <h3>{s.name} <ExternalLink size={13} className="hicon" /></h3>
                 <p>{s.desc}</p>
               </a>
             ))}
           </div>
         </div>
-      ))}
+        )
+      })}
       {games.length === 0 && <p className="muted">No matches. Try "minecraft", "gta" or "manager".</p>}
     </>
   )
@@ -1745,20 +1870,25 @@ function Software({ query }) {
   return (
     <>
       <SectionHead title="Essential software" desc="The free apps nearly everyone ends up installing: browsers, players, utilities, dev tools, launchers. All free tiers or fully free - no trials masquerading as freeware." />
-      {groups.map((g) => (
+      {groups.map((g) => {
+        const gm = GROUP_META[g.group]
+        const GroupIcon = gm && gm.icon
+        return (
         <div key={g.group}>
           <h3 className="cat">{g.group} <span className="countBadge">{g.apps.length}</span></h3>
           <p className="catDesc">{g.desc}</p>
           <div className="cards">
             {g.apps.map((a) => (
               <a key={a.name} className="card link" href={a.url} target="_blank" rel="noreferrer">
+                {GroupIcon && <span className="catIcon" style={{ color: gm.color }}><GroupIcon size={22} /></span>}
                 <h3>{a.name} <ExternalLink size={13} className="hicon" /></h3>
                 <p>{a.desc}</p>
               </a>
             ))}
           </div>
         </div>
-      ))}
+        )
+      })}
       {groups.length === 0 && <p className="muted">No matches. Try "browser", "video" or "terminal".</p>}
     </>
   )
@@ -1770,6 +1900,7 @@ function Software({ query }) {
    submission triggers an activation email the owner must confirm once. */
 function Recommend() {
   const [form, setForm] = useState({ site: '', name: '', desc: '', notes: '', from: '' })
+  const [kind, setKind] = useState('suggestion')
   const [status, setStatus] = useState('idle')
   const [msg, setMsg] = useState('')
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
@@ -1777,7 +1908,7 @@ function Recommend() {
   const send = async () => {
     if (!form.site.trim() || !form.desc.trim()) {
       setStatus('error')
-      setMsg('Site URL + description are required - otherwise it is a mystery link.')
+      setMsg(kind === 'report' ? 'Site URL + what happened are required.' : 'Site URL + description are required - otherwise it is a mystery link.')
       return
     }
     let site = form.site.trim()
@@ -1794,10 +1925,11 @@ function Recommend() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
-          _subject: `LootCave recommendation: ${form.name.trim() || site}`,
+          _subject: kind === 'report' ? `LootCave LINK REPORT: ${form.name.trim() || site}` : `LootCave recommendation: ${form.name.trim() || site}`,
           _template: 'table',
           _captcha: 'false',
           _honey: '',
+          Type: kind === 'report' ? 'REPORT - bad link (review + pull if confirmed)' : 'Suggestion',
           'Site URL': site,
           'Site name': form.name.trim() || '(not given)',
           Description: form.desc.trim(),
@@ -1808,7 +1940,7 @@ function Recommend() {
       if (!res.ok) throw new Error('HTTP ' + res.status)
       setStatus('sent')
       setForm({ site: '', name: '', desc: '', notes: '', from: '' })
-      logEvent('recommend', 'recommendation sent')
+      logEvent('recommend', kind + ' sent')
     } catch (e) {
       setStatus('error')
       setMsg('Could not send: ' + String(e.message).slice(0, 160) + '. Check connection and retry.')
@@ -1818,19 +1950,23 @@ function Recommend() {
 
   return (
     <>
-      <SectionHead title="Recommend a site" desc="Found something that belongs in the cave? Drop the link, say what it is and why it's cool. Your suggestion is emailed straight to the owner for review." />
+      <SectionHead title="Recommend a site" desc="Found something that belongs in the cave? Or spotted a listed link that turned shady? Both land straight in the owner inbox." />
       <div className="grid2">
         <div className="card big">
-          <h3><Send size={16} className="hicon" /> Suggest a site</h3>
+          <h3><Send size={16} className="hicon" /> {kind === 'report' ? 'Report a link' : 'Suggest a site'}</h3>
+          <div className="btnRow">
+            <button className={kind === 'suggestion' ? '' : 'ghost sm'} onClick={() => setKind('suggestion')}>Suggest</button>
+            <button className={kind === 'report' ? '' : 'ghost sm'} onClick={() => setKind('report')}>Report a link</button>
+          </div>
           <input value={form.site} onChange={set('site')} placeholder="Site URL (https://…)" inputMode="url" />
           <input value={form.name} onChange={set('name')} placeholder="Site name" />
-          <textarea rows="3" value={form.desc} onChange={set('desc')} placeholder="What is it? Why should it be listed?" />
+          <textarea rows="3" value={form.desc} onChange={set('desc')} placeholder={kind === 'report' ? 'What happened? Malware warning? Dead? Scammy redirects?' : 'What is it? Why should it be listed?'} />
           <textarea rows="2" value={form.notes} onChange={set('notes')} placeholder="Extra notes (optional): category it fits, free tier details…" />
           <input value={form.from} onChange={set('from')} placeholder="Your name/handle (optional)" />
           <div className="btnRow">
-            <button onClick={send} disabled={status === 'sending'}><Send size={15} className="btnIcon" /> {status === 'sending' ? 'Sending…' : 'Send recommendation'}</button>
+            <button onClick={send} disabled={status === 'sending'}><Send size={15} className="btnIcon" /> {status === 'sending' ? 'Sending…' : kind === 'report' ? 'Send report' : 'Send recommendation'}</button>
           </div>
-          {status === 'sent' && <p className="muted">Sent! The owner reviews every suggestion before it goes live. Suggest another any time.</p>}
+          {status === 'sent' && <p className="muted">{kind === 'report' ? 'Report sent! Bad links get pulled once confirmed.' : 'Sent! The owner reviews every suggestion before it goes live. Suggest another any time.'}</p>}
           {status === 'error' && <p className="err">{msg}</p>}
         </div>
         <div className="card">
@@ -1839,6 +1975,7 @@ function Recommend() {
             <li><b>Reviewed by a human.</b> Nothing auto-publishes - good picks get added manually.</li>
             <li><b>What gets in:</b> free, useful, legal. Same bar as the rest of the directory.</li>
             <li><b>What doesn't:</b> pirate streams, "free Robux" scams, referral spam.</li>
+            <li><b>Bad link?</b> switch the form to Report a link - confirmed malicious or dead entries get pulled fast.</li>
             <li><b>First-time note:</b> the delivery service asks the owner to confirm once before the first email arrives.</li>
           </ul>
         </div>
@@ -2095,13 +2232,13 @@ function About({ settings, go }) {
           <p>Free, permanently. The site is fully static, runs on free public APIs, and is hosted at no cost on Cloudflare Pages. Operating costs are zero, so there are no premium tiers, no ads, and no paywalls.</p>
           <h3>Privacy</h3>
           <p>Settings, custom sites, and chat nicknames never leave the visitor's browser. Two exceptions to understand: temporary emails and numbers are public by design, and chat messages travel over public relays. Neither should ever carry sensitive information.</p>
-          <h3>House rules</h3>
+          <h3>Safety basics</h3>
           <ul className="tips">
-            <li>Free temp stuff is public. Never banking, recovery, or anything sensitive.</li>
-            <li>Fake IDs are for testing signups, never legal documents.</li>
-            <li>Only legal streaming and legal downloads. No pirate links, ever.</li>
-            <li>Pranks stay harmless and consensual. LAN pranks need permission.</li>
+            <li>Free temp inboxes and numbers are public - never use them for banking or recovery.</li>
+            <li>Fake IDs are for testing signups only, never legal documents.</li>
+            <li>Everything listed here is free and legal. No pirate links, ever.</li>
           </ul>
+          <p className="muted">Something slipped through or turned shady? Report it via Recommend (type: Report a link) and it gets reviewed and pulled.</p>
         </div>
         <div className="cards single">
           <div className="card">
@@ -2132,7 +2269,7 @@ function About({ settings, go }) {
             <h3><Wrench size={16} className="hicon" /> Built with</h3>
             <ul className="tips">
               <li>React + Vite, static only, zero backend</li>
-              <li>Lucide icons, 10 themes, localStorage everything</li>
+              <li>Lucide icons, 11 themes, localStorage everything</li>
               <li>1secmail + Nostr relays + FormSubmit (all free tiers)</li>
               <li>Hosted free on Cloudflare Pages</li>
             </ul>
@@ -2178,6 +2315,7 @@ function TempFiles({ query }) {
         {list.map((f) => (
           <div key={f.name} className="card linkWrap">
             <a className="linkMain" href={f.url} target="_blank" rel="noreferrer">
+              <span className="catIcon" style={{ color: TEMP_META.color }}><TEMP_META.icon size={22} /></span>
               <h3>{f.name} <ExternalLink size={13} className="hicon" /> <span className="keepBadge">{f.keep}</span></h3>
               <p>{f.desc}</p>
             </a>
@@ -3232,6 +3370,11 @@ function Settings({ settings, update, reset, customSites, setCustomSites }) {
           <label className="setRow">Discord invite link - shown on the About page (empty = default invite).
             <input value={settings.discordInvite} onChange={(e) => update({ discordInvite: e.target.value })} placeholder="https://discord.gg/…" />
           </label>
+          <h3 className="cat">Monetization</h3>
+          <label className="setRow">AdSense publisher ID - enables Google Auto Ads site-wide. Empty = no ads.
+            <input value={settings.adClient} onChange={(e) => update({ adClient: e.target.value.trim() })} placeholder="ca-pub-XXXXXXXXXXXXXXXX" />
+          </label>
+          <p className="muted">Needs an approved AdSense account, and the account holder must be 18+. Reload the page after saving. Honest math: this crowd runs adblockers, so expect pocket money, not rent money.</p>
           <h3 className="cat">Backup - take your data with you</h3>
           <p className="muted">Exports settings + your custom sites as one JSON file. Import it on another browser to clone your setup.</p>
           <div className="btnRow">
@@ -3524,12 +3667,31 @@ export default function App() {
     window.__lootSounds = settings.uiSounds
     if (settings.accent) document.documentElement.style.setProperty('--accent', settings.accent)
     else document.documentElement.style.removeProperty('--accent')
+    const adId = (settings.adClient || '').trim()
+    if (adId && !document.querySelector('script[data-lootcave-ads]')) {
+      const s = document.createElement('script')
+      s.async = true
+      s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(adId)}`
+      s.crossOrigin = 'anonymous'
+      s.dataset.lootcaveAds = '1'
+      document.head.appendChild(s)
+    }
   }, [settings])
 
   useEffect(() => {
     localStorage.setItem('lootbox-custom-sites', JSON.stringify(customSites))
   }, [customSites])
 
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        document.getElementById('site-search')?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
   useEffect(() => {
     try {
       localStorage.setItem('lootbox-visits', String(+(localStorage.getItem('lootbox-visits') || 0) + 1))
@@ -3564,12 +3726,14 @@ export default function App() {
         <p className="tag">{settings.customTagline || 'temp emails · temp numbers · mods · tools'} {settings.showClock && <HeaderClock />}</p>
         <div className="searchRow">
           <input
+            id="site-search"
             className="search"
             placeholder="Search sites, mods, apps… (Enter jumps to results)"
             value={query}
             onChange={(e) => { setQuery(e.target.value); setSearchMsg('') }}
             onKeyDown={(e) => e.key === 'Enter' && jumpSearch()}
           />
+          <kbd title="Focus search">Ctrl K</kbd>
         </div>
         <nav className="sideNav">
           <button className={tab === 'home' ? 'navItem active' : 'navItem'} onClick={() => pick('home')}>
@@ -3668,7 +3832,7 @@ export default function App() {
         {tab === 'settings' && <Settings settings={settings} update={update} reset={() => setSettings(DEFAULT_SETTINGS)} customSites={customSites} setCustomSites={setCustomSites} />}
         {tab === 'admin' && <Admin customSites={customSites} onDeleteSite={delSite} onWipe={wipe} />}
       </main>
-      <footer>© 2026 LootCave - built for fun, use responsibly · static only, no backend</footer>
+      <footer>© 2026 LootCave - built for fun, use responsibly · static only, no backend<br />This site does not host any files.</footer>
       </div>
     </div>
   )

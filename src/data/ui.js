@@ -1,9 +1,9 @@
 // LootCave UI config - tabs, descriptions, themes.
 // Edit labels/descriptions freely. Icons come from lucide.dev (see package.json: lucide-react).
 import {
-  BookOpen, Bot, Coffee, Download, FileUp, Flower2, Gamepad2, Globe, Home, IdCard, Info, Laptop, Laugh, ListMusic, Lock, Mail,
-  MessageCircle, Moon, Send, Server, ServerCog, Settings, Smartphone, Snowflake, Sparkles, Sun, Sunset, Terminal,
-  Waves, Wrench, Zap,
+  BookOpen, Bot, Car, Coffee, Download, FileJson, FileUp, Flower2, Gamepad2, Globe, HardDrive, Home, Hourglass, IdCard, Images, Info, KeyRound, Laptop, Laugh, LayoutGrid, ListMusic, Lock, Mail,
+  Map, MessageCircle, Moon, Package, Palette, Pencil, Pickaxe, Rocket, ScanSearch, Send, Server, ServerCog, Settings, ShieldCheck, Smartphone, Snowflake, Sparkles, Star, Sun, Sunset, Swords, Terminal,
+  TriangleAlert, Tv, Users, Waves, Wrench, Zap,
 } from 'lucide-react'
 
 export const TABS = [
@@ -73,4 +73,49 @@ export const THEMES = [
   { id: 'nord', name: 'Nord', icon: Snowflake, desc: 'Frosty arctic blues, calm and crisp.', preview: { bg: '#2e3440', panel: '#3b4252', border: '#4c566a', head: '#eceff4', muted: '#8b98ad', accent: '#88c0d0' } },
   { id: 'coffee', name: 'Coffee', icon: Coffee, desc: 'Warm sepia browns for late nights.', preview: { bg: '#1d130e', panel: '#2a1d14', border: '#4a3527', head: '#f7ead9', muted: '#a08066', accent: '#d4a373' } },
   { id: 'rose', name: 'Rose', icon: Flower2, desc: 'Soft light-pink daytime theme.', preview: { bg: '#fdf0f4', panel: '#ffffff', border: '#efc3d4', head: '#381522', muted: '#a97b8f', accent: '#e75480' } },
+  { id: 'fmhy', name: 'FMHY', icon: Rocket, desc: 'Wiki-style flagship: sky accents, docs energy.', preview: { bg: '#14161b', panel: '#1d2027', border: '#2e333d', head: '#f2f5f9', muted: '#7d8694', accent: '#7bc5e4' } },
 ]
+
+export const CAT_META = {
+  'Security': { icon: ShieldCheck, color: '#D05A6E' },
+  'Adblock & Privacy': { icon: TriangleAlert, color: '#f17c67' },
+  'VPN & Privacy Net': { icon: KeyRound, color: '#7aa2f7' },
+  'OSINT (legal)': { icon: ScanSearch, color: '#91989F' },
+  'Simulators & Playgrounds': { icon: Gamepad2, color: '#49d3e9' },
+  'Reddit Gems': { icon: MessageCircle, color: '#FB9966' },
+  'Free Hosting': { icon: HardDrive, color: '#BEC23F' },
+  'Free AI': { icon: Sparkles, color: '#8A6BBE' },
+  'Everyday Utils': { icon: Wrench, color: '#A8D8B9' },
+  'Files': { icon: FileJson, color: '#7c82fe' },
+  'Dev': { icon: Terminal, color: '#eab308' },
+  'Media': { icon: Images, color: '#3ccd93' },
+  'Watch (legal)': { icon: Tv, color: '#38bdf8' },
+  'Shops & Deals': { icon: Star, color: '#f59e0b' },
+  'Create & Design': { icon: Palette, color: '#f472b6' },
+  'Learn': { icon: BookOpen, color: '#c084fc' },
+  'My Stuff': { icon: Pencil, color: '#94a3b8' },
+}
+
+export const GAME_META = {
+  'FiveM (GTA RP)': { icon: Car, color: '#ff6b6b' },
+  'Minecraft': { icon: Pickaxe, color: '#3ccd93' },
+  'GTA V (story mode)': { icon: Map, color: '#f59e0b' },
+  'Bethesda (Skyrim, Fallout)': { icon: Swords, color: '#8A6BBE' },
+  'The Sims 4': { icon: Users, color: '#f472b6' },
+  'Everything else': { icon: LayoutGrid, color: '#38bdf8' },
+  'Mod managers': { icon: Package, color: '#BEC23F' },
+}
+
+export const GROUP_META = {
+  'Browsers': { icon: Globe, color: '#7aa2f7' },
+  'Media': { icon: Images, color: '#3ccd93' },
+  'Utilities': { icon: Wrench, color: '#A8D8B9' },
+  'Dev tools': { icon: Terminal, color: '#eab308' },
+  'Gaming': { icon: Gamepad2, color: '#49d3e9' },
+  'Chat & mail': { icon: MessageCircle, color: '#FB9966' },
+  'Security': { icon: ShieldCheck, color: '#D05A6E' },
+  'Create': { icon: Palette, color: '#f472b6' },
+}
+
+export const TEMP_META = { icon: Hourglass, color: '#00e5cc' }
+export const SMS_META = { icon: Smartphone, color: '#7aa2f7' }

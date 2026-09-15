@@ -161,6 +161,7 @@ export const SOFTWARE = [
       { name: 'Docker Desktop', url: 'https://www.docker.com/products/docker-desktop/', desc: 'Run anything in containers. Free for personal use.' },
       { name: 'Insomnia', url: 'https://insomnia.rest', desc: 'Beautiful API client. Free tier covers most testing.' },
       { name: 'Bruno', url: 'https://www.usebruno.com', desc: 'Open-source API client, Git-friendly. Postman alternative.' },
+      { name: 'Wireshark', url: 'https://www.wireshark.org', desc: 'See every packet on your network. Free, legendary.' },
       { name: 'LazyGit', url: 'https://github.com/jesseduffield/lazygit', desc: 'Git with a terminal UI you will actually enjoy.' },
       { name: 'Oh My Posh', url: 'https://ohmyposh.dev', desc: 'Pretty prompt themes for any shell.' },
       { name: 'fnm', url: 'https://github.com/Schniz/fnm', desc: 'Fast Node version manager. nvm without the lag.' },
